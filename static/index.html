@@ -81,6 +81,12 @@ border-radius:0 6px 6px 0;margin:0 0 10px;font:13px/1.6 inherit;color:#ffd98a}
 .note.bad{border-color:var(--red);background:#2a1414;color:#ffb4b4}
 .note b{display:block;margin-bottom:3px;font-size:13.5px}
 .meter.hot{color:var(--amber)}
+.pw{display:none;align-items:center;gap:6px}
+.pw.on{display:flex}
+.pw input{width:130px;background:#0b0e12;color:var(--fg);border:1px solid var(--line);
+border-radius:7px;padding:8px 10px;font:13px/1.2 var(--mono)}
+.pw input:focus{outline:none;border-color:var(--accent)}
+.pw input.bad{border-color:var(--red)}
 footer{padding:7px 16px;border-top:1px solid var(--line);color:var(--dim);
 font:11.5px/1.5 var(--mono);display:flex;gap:16px;flex-wrap:wrap}
 a{color:var(--dim)}a:hover{color:var(--accent)}
@@ -98,7 +104,13 @@ a{color:var(--dim)}a:hover{color:var(--accent)}
         <option value="mixed">all three at once  ·  4 questions, run in parallel</option>
       </select>
     </label>
-    <button onclick="burst()" id="bz" title="fire 20 requests at the same time and watch them queue">Stress test</button>
+    <button onclick="askPw()" id="bz" title="fire 20 requests at the same time and watch them queue">Stress test</button>
+    <span class="pw" id="pwbox">
+      <input id="pw" type="password" placeholder="password" autocomplete="off"
+             onkeydown="if(event.key==='Enter')burst(); if(event.key==='Escape')hidePw()">
+      <button onclick="burst()">Go</button>
+      <button onclick="hidePw()" title="cancel">×</button>
+    </span>
     <button onclick="curlIt()">Copy as curl</button>
   </div>
   <div class="meter" id="meter"></div>
@@ -317,8 +329,18 @@ function curlIt(){
   });
 }
 
+function askPw(){
+  if(LAST && LAST.stress_enabled === false)
+    return errPanel(404,'Stress testing is switched off on this instance.');
+  $('pwbox').classList.add('on'); $('pw').classList.remove('bad');
+  $('bz').style.display='none'; $('pw').focus();
+}
+function hidePw(){ $('pwbox').classList.remove('on'); $('bz').style.display=''; $('pw').value=''; }
+
 async function burst(){
   const b=check(); if(!b) return;
+  const pw=$('pw').value;
+  if(!pw){ $('pw').classList.add('bad'); $('pw').focus(); return; }
   const btn=$('bz'); btn.disabled=true; btn.textContent='firing…';
   const t0=performance.now();
   let done=0;
@@ -332,24 +354,33 @@ async function burst(){
       `<div class="sub">${s.active}/${s.slots} slots busy · <span style="color:var(--amber)">${s.waiting} waiting</span></div>`+
       `<div class="sub" style="margin-top:9px">20 requests, ${s.slots} slots — they finish in waves.</div></div>`;
   },200);
-  const rs=(await Promise.all([...Array(20)].map(()=>
-    fetch('/api/decide',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(b)}).then(r=>{done++; return r.ok?r.json():null;}).catch(()=>{done++; return null;})))).filter(Boolean);
+  let j, r;
+  try{
+    r = await fetch('/api/stress',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({password:pw, state:b.state, questions:b.questions})});
+    j = await r.json();
+  }catch(e){ clearInterval(tick); errPanel(0,String(e));
+             btn.disabled=false; btn.textContent='Stress test'; return; }
   clearInterval(tick);
-  const wall=Math.round(performance.now()-t0);
-  if(!rs.length){ errPanel(503,'All 20 requests were rejected — the per-IP rate limit is '+
-    (LAST?LAST.rate_per_min:30)+'/min.'); btn.disabled=false; btn.textContent='Stress test'; return; }
-  rs.sort((a,c)=>a.timing_ms.queued-c.timing_ms.queued);
+  btn.disabled=false; btn.textContent='Stress test';
+  if(!r.ok){
+    if(r.status===401){ $('pw').classList.add('bad'); $('pw').select();
+      $('code').innerHTML='<span class="bad">HTTP 401</span> · wrong password'; return; }
+    errPanel(r.status, j.detail); return;
+  }
+  hidePw();
+  const rs=j.rows;
+  const wall=j.wall_ms;
   const pad=(v,n)=>String(v).padStart(n);
-  $('code').innerHTML=`<span class="ok">burst</span> · 20 requests · ${rs.length} ok · wall ${wall} ms`;
+  $('code').innerHTML=`<span class="ok">stress</span> · ${j.requests} requests · ${j.ok} ok · `+
+    `${j.calls} model calls · wall ${Math.round(wall)} ms`;
   $('res').className = '';
   $('res').innerHTML =
-    `<span class="k">//  #   queued   served  routing    total   busy@arrival</span>\n`+
-    rs.map((d,i)=>{const t=d.timing_ms,q=d.queue;
-      return `${pad(i,4)} <span class="n">${pad(t.queued,8)}</span> <span class="n">${pad(t.served,8)}</span>`+
-             ` <span class="n">${pad(t.routing,8)}</span> <span class="n">${pad(t.total,8)}</span>`+
-             `   <span class="b">${q.busy_on_arrival}/${q.slots}+${q.waiting_on_arrival}w</span>`;}).join('\n')+
-    `\n\n<span class="k">// 8 slots, so the queue column steps in waves of 8.</span>`;
+    `<span class="k">//  #    queued    served  routing     total</span>\n`+
+    rs.map((t,i)=>
+      `${pad(i,4)} <span class="n">${pad(t.queued,9)}</span> <span class="n">${pad(t.served,9)}</span>`+
+      ` <span class="n">${pad(t.routing,8)}</span> <span class="n">${pad(t.total,9)}</span>`).join('\n')+
+    `\n\n<span class="k">// ${j.slots} slots, so the queue column steps in waves of ${j.slots}.</span>`;
   $('timing').innerHTML=`<span>peak queue wait <b class="q">${Math.max(...rs.map(r=>r.timing_ms.queued))} ms</b></span>`+
     `<span>avg served <b class="sv">${Math.round(rs.reduce((s,r)=>s+r.timing_ms.served,0)/rs.length)} ms</b></span>`+
     `<span>avg routing <b class="rt">${(rs.reduce((s,r)=>s+r.timing_ms.routing,0)/rs.length).toFixed(1)} ms</b></span>`;
@@ -361,6 +392,8 @@ async function poll(){
   try{
     const s = await (await fetch('/api/stats')).json();
     LAST = s;
+    if(s.stress_enabled === false && !$('pwbox').classList.contains('on'))
+      $('bz').style.display = 'none';
     $('meter').className = 'meter' + (s.waiting ? ' hot' : '');
     $('meter').innerHTML = [...Array(s.slots)].map((_,i)=>
       `<span class="slot ${i<s.active?'on':''}"></span>`).join('')+

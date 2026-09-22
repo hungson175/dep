@@ -74,7 +74,8 @@ pip install fastapi uvicorn
 uvicorn app:app --port 8000
 ```
 
-`DEP_SLOTS` must match `-np`. The app admits that many **model calls** — not requests —
+`DEP_SLOTS` must match `-np`. Set `DEP_STRESS_HASH` to the sha256 of a password to
+enable the stress-test button; leave it unset and `/api/stress` returns 404. The app admits that many **model calls** — not requests —
 so a 4-question request fans out to 4 parallel calls competing for the same slots.
 Every response reports which branch decided the latency (`critical_path`) and where the
 time went: `queued` / `served` / `routing`.

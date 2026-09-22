@@ -5,7 +5,7 @@ A request with 4 questions fans out to 4 calls that run in parallel and compete 
 the same 8 slots as everybody else's. Every response reports the critical path:
 which branch decided the latency, how long it waited, and how long it was served.
 """
-import asyncio, collections, os, threading, time
+import asyncio, collections, hashlib, hmac, os, threading, time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
@@ -23,6 +23,13 @@ MAX_WAITING = 96                                   # model calls queued before s
 SLOT_TIMEOUT_S = 90
 MAX_STATE_CHARS = 40_000
 RATE_PER_MIN = 30
+
+# Stress test is gated: without DEP_STRESS_HASH (sha256 hex of the password) the
+# endpoint does not exist. The hash is never committed -- it lives in the unit file.
+STRESS_HASH = os.environ.get("DEP_STRESS_HASH", "").strip().lower()
+STRESS_N = 20
+STRESS_COOLDOWN_S = 20
+_stress_last = {"t": 0.0}
 
 app = FastAPI(title="dep", docs_url="/api/docs", openapi_url="/api/openapi.json")
 
@@ -160,6 +167,55 @@ async def decide(body: Req, request: Request) -> Dict[str, Any]:
     }
 
 
+class StressReq(BaseModel):
+    password: str = Field(max_length=200)
+    state: str = Field(max_length=MAX_STATE_CHARS)
+    questions: Dict[str, Question]
+
+
+@app.post("/api/stress")
+async def stress(body: StressReq, request: Request) -> Dict[str, Any]:
+    """Fire STRESS_N requests at once, server side. Password-gated: this is the one
+    thing a visitor could use to saturate the box on purpose."""
+    if not STRESS_HASH:
+        raise HTTPException(404, "stress testing is not enabled on this instance")
+    given = hashlib.sha256(body.password.encode()).hexdigest()
+    if not hmac.compare_digest(given, STRESS_HASH):
+        await asyncio.sleep(0.5)                      # blunt the guessing rate
+        raise HTTPException(401, "wrong password")
+
+    now = time.monotonic()
+    left = STRESS_COOLDOWN_S - (now - _stress_last["t"])
+    if left > 0:
+        raise HTTPException(429, f"stress test cooling down, {left:.0f}s left")
+    _stress_last["t"] = now
+
+    n = len(body.questions)
+    if not 1 <= n <= MAX_QUESTIONS:
+        raise HTTPException(400, f"1..{MAX_QUESTIONS} questions")
+
+    loop = asyncio.get_running_loop()
+
+    async def one():
+        t0 = time.perf_counter()
+        res = await asyncio.gather(*[
+            loop.run_in_executor(_pool, _one_call, body.state, name, q, t0)
+            for name, q in body.questions.items()])
+        total = (time.perf_counter() - t0) * 1000
+        _, _, w, m = max(res, key=lambda r: r[2] + r[3])
+        return {"queued": round(w, 1), "served": round(m, 1),
+                "routing": round(max(0.0, total - w - m), 1), "total": round(total, 1)}
+
+    t0 = time.perf_counter()
+    rows = await asyncio.gather(*[one() for _ in range(STRESS_N)],
+                                return_exceptions=True)
+    wall = (time.perf_counter() - t0) * 1000
+    ok = [r for r in rows if isinstance(r, dict)]
+    ok.sort(key=lambda r: r["queued"])
+    return {"requests": STRESS_N, "ok": len(ok), "slots": SLOTS,
+            "calls": STRESS_N * n, "wall_ms": round(wall, 1), "rows": ok}
+
+
 @app.get("/api/stats")
 def get_stats() -> Dict[str, Any]:
     r = stats["requests"] or 1
@@ -169,6 +225,7 @@ def get_stats() -> Dict[str, Any]:
             "rejected": stats["rejected"], "busy": busy,
             "max_waiting": MAX_WAITING, "max_questions": MAX_QUESTIONS,
             "rate_per_min": RATE_PER_MIN, "slot_timeout_s": SLOT_TIMEOUT_S,
+            "stress_enabled": bool(STRESS_HASH), "stress_n": STRESS_N,
             "avg_queued_ms": round(stats["total_wait_ms"] / r, 1),
             "peak_queued_ms": round(stats["peak_wait_ms"], 1)}
 
