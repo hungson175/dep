@@ -5,7 +5,7 @@ they dominate the distribution, then softmax the returned logprobs over the cand
 only. Equal bias cancels in the softmax ratio, so the renormalised distribution is the
 model's true relative belief -- calibrated, not a guess parsed out of prose.
 """
-import functools, json, math, os, threading, time, urllib.request
+import functools, json, os, threading, time, urllib.request
 
 URL = os.environ.get("DEP_LLAMA_URL", "http://127.0.0.1:8080")
 BIAS = 50.0
@@ -50,7 +50,7 @@ def _post(path, body):
 
 
 @functools.lru_cache(maxsize=512)
-def token_id(text):
+def _token_id_cached(text):
     """Single token id for `text`, trying the leading-space variant first.
 
     Which of " Yes" / "Yes" is one token is tokeniser-specific, so try both
@@ -60,26 +60,59 @@ def token_id(text):
         ids = _post("/tokenize", {"content": cand})["tokens"]
         if len(ids) == 1:
             return ids[0]
-    raise ValueError(f"no single-token form of {text!r}")
+    raise ValueError("no single-token form for that answer mark")
+
+
+def token_id(text):
+    """Cache only short marks; caching arbitrary user strings pins unbounded RAM."""
+    return _token_id_cached(text) if len(text) <= 8 else _token_id_uncached(text)
+
+
+def _token_id_uncached(text):
+    for cand in ([text, text.lstrip()] if text.startswith(" ") else [text, " " + text]):
+        ids = _post("/tokenize", {"content": cand})["tokens"]
+        if len(ids) == 1:
+            return ids[0]
+    raise ValueError("no single-token form for that answer mark")
 
 
 def decide(prompt, labels):
-    """labels: {name: single-token string}. Returns {name: probability}, sums to 1."""
+    """labels: {name: single-token string}. Returns {name: probability}, sums to 1.
+
+    Two things force the answer into the schema, and the prompt is neither of them:
+      * n_predict=1  -- a hard stop, not a request. One token comes out, full stop.
+      * logit_bias   -- an equal bias on every candidate, so the one token that does
+                        come out must be one of ours.
+
+    The bias must also be visible in the numbers we read back. llama.cpp's default
+    `n_probs` reports PRE-sampling logits (server-context.cpp:1697), i.e. before
+    logit_bias, ranked by the unbiased distribution -- so a candidate the model
+    dislikes falls outside the reporting window and silently reads as zero.
+    `post_sampling_probs` reports the distribution the sampler actually saw, where
+    the biased candidates sit at the top. The other samplers truncate, so they are
+    switched off, and temperature must be 1.0 or the reported distribution collapses
+    to one-hot.
+    """
     ids = {name: token_id(tok) for name, tok in labels.items()}
     out = _post("/completion", {
         "prompt": prompt,
         "n_predict": 1,
-        "temperature": 0,
-        "n_probs": max(20, len(ids) * 2),
+        "temperature": 1.0,
+        "n_probs": min(40, max(20, len(ids) * 2)),
+        "post_sampling_probs": True,
         "logit_bias": [[i, BIAS] for i in ids.values()],
+        "top_k": 0, "top_p": 1.0, "min_p": 0.0, "typical_p": 1.0, "top_n_sigma": -1.0,
     })
-    top = {t["id"]: t["logprob"]
-           for t in out["completion_probabilities"][0]["top_logprobs"]}
-    lp = {name: top.get(i, -60.0) for name, i in ids.items()}
-    m = max(lp.values())
-    e = {k: math.exp(v - m) for k, v in lp.items()}
-    z = sum(e.values())
-    return {k: v / z for k, v in e.items()}
+    pos = out["completion_probabilities"][0]
+    top = {t["id"]: t["prob"] for t in pos.get("top_probs", [])}
+    missing = [n for n, i in ids.items() if i not in top]
+    if missing:   # would silently become zero -- refuse rather than invent a number
+        raise RuntimeError(f"candidates missing from the reported distribution: {missing}")
+    raw = {name: top[i] for name, i in ids.items()}
+    z = sum(raw.values())
+    if z <= 0:
+        raise RuntimeError("all candidates had zero probability")
+    return {k: v / z for k, v in raw.items()}
 
 
 # ---- confidence ----------------------------------------------------------

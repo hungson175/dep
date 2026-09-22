@@ -87,7 +87,13 @@ uvicorn app:app --port 8000
 ```
 
 `DEP_SLOTS` must match `-np`. Set `DEP_STRESS_HASH` to the sha256 of a password to
-enable the stress-test button; leave it unset and `/api/stress` returns 404. The app admits that many **model calls** — not requests —
+enable the stress-test button; leave it unset and `/api/stress` returns 404.
+
+If you expose this publicly, put authentication in front of it. The built-in per-IP
+rate limit is a speed bump, not a wall: anyone with a /64 of IPv6 has unlimited
+buckets. Admission is capped at `SLOTS` concurrent requests and 24 queued, the body at
+256 KB, and options at 20 per question -- enough that one careless visitor cannot
+knock the box over, not enough to stop someone who is trying. The app admits that many **model calls** — not requests —
 so a 4-question request fans out to 4 parallel calls competing for the same slots.
 Every response reports which branch decided the latency (`critical_path`) and where the
 time went: `queued` / `served` / `routing`.

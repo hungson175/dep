@@ -136,8 +136,7 @@ a{color:var(--dim)}a:hover{color:var(--accent)}
 <footer>
   <span>Ternary Bonsai 2 27B · ~1.72 bits/weight · one RTX 3090 Ti</span>
   <span>8 slots × 16k ctx · queue admits 8 model calls · up to 4 questions run in parallel</span>
-  <span>no tokens billed · 30 req/min/IP</span>
-  <a href="/api/docs">/api/docs</a>
+  <span>no tokens billed · shared, rate limited</span>
 </footer>
 
 <script>
@@ -270,6 +269,9 @@ function showWaiting(t0, mine){
      </div>`;
 }
 
+function esc(s){ return String(s==null?'':s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
 function errPanel(status, detail){
   const map = {
     429: ['Slow down a moment', ''],
@@ -280,7 +282,7 @@ function errPanel(status, detail){
   };
   const [title, hint] = map[status] || ['Request failed', ''];
   $('res').className = 'panel';
-  $('res').innerHTML = `<div class="wait"><div class="note bad"><b>${title}</b>${detail||''}` +
+  $('res').innerHTML = `<div class="wait"><div class="note bad"><b>${esc(title)}</b>${esc(detail)}` +
     (hint ? `<div style="margin-top:6px;opacity:.85">${hint}</div>` : '') + `</div></div>`;
 }
 
