@@ -1,0 +1,32 @@
+# --- never commit anything that could authenticate or locate the host ---
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.crt
+*.p12
+*secret*
+*credential*
+*apikey*
+*api-key*
+*token*
+*.json.creds
+.cloudflared/
+cloudflared*.yml
+cloudflared*.yaml
+*tunnel*.json
+Caddyfile*
+*.service
+deploy/
+hosts.txt
+
+# --- local noise ---
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.log
+.DS_Store
+.idea/
+.vscode/

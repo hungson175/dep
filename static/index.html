@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>dep — typed decisions</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>">
+<style>
+:root{--bg:#0d0f13;--panel:#12161c;--line:#232a35;--fg:#e6e9ef;--dim:#8b95a5;
+--accent:#6ee7a8;--amber:#f0b429;--blue:#7aa2f7;--red:#f87171;--pink:#e27ba3;
+--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+font:14px/1.5 ui-sans-serif,system-ui,-apple-system,sans-serif;
+display:flex;flex-direction:column;height:100vh;overflow:hidden}
+header{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;
+align-items:center;gap:14px;flex-wrap:wrap}
+h1{margin:0;font-size:15px;font-weight:650;letter-spacing:-.01em;white-space:nowrap}
+h1 span{color:var(--dim);font-weight:400}
+.presets{display:flex;gap:6px;flex-wrap:wrap}
+button{background:transparent;border:1px solid var(--line);color:var(--dim);
+border-radius:7px;padding:8px 13px;font:13px/1.2 inherit;cursor:pointer}
+button:hover{color:var(--fg);border-color:#39455a}
+button.go{background:var(--accent);color:#06281a;border-color:var(--accent);font-weight:700;padding:6px 15px}
+button.go:disabled{opacity:.45;cursor:default}
+button:disabled{opacity:.4;cursor:default}
+.pick{display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:7px;
+overflow:hidden;background:#0b0e12}
+.pick:hover,.pick:focus-within{border-color:#3d4a60}
+.pick span{padding:0 10px;align-self:stretch;display:flex;align-items:center;
+background:#161b23;color:var(--dim);font-size:12px;font-weight:600;
+text-transform:uppercase;letter-spacing:.09em;border-right:1px solid var(--line)}
+select{appearance:none;background:transparent;color:var(--fg);border:0;
+padding:8px 32px 8px 11px;font:13.5px/1.2 inherit;cursor:pointer;min-width:310px;
+background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5L6 8l3.5-3.5' stroke='%238b95a5' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+background-repeat:no-repeat;background-position:right 11px center}
+select:focus{outline:none}
+select option{background:#12161c;color:var(--fg);font-size:13.5px}
+.meter{display:flex;gap:3px;align-items:center;margin-left:auto;
+font:11.5px/1 var(--mono);color:var(--dim);white-space:nowrap}
+.slot{width:9px;height:14px;border-radius:2px;background:#1d2530}
+.slot.on{background:var(--accent)}
+main{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);min-height:0}
+@media(max-width:860px){main{grid-template-columns:1fr;grid-template-rows:1fr 1fr}}
+.pane{background:var(--panel);display:flex;flex-direction:column;min-height:0;min-width:0}
+.bar{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid var(--line);
+font:11px/1 var(--mono);text-transform:uppercase;letter-spacing:.09em;color:var(--dim);flex-wrap:wrap}
+.bar .r{margin-left:auto;text-transform:none;letter-spacing:0}
+textarea{flex:1;width:100%;background:#0b0e12;color:var(--fg);border:0;padding:12px;
+resize:none;font:13px/1.65 var(--mono);tab-size:2}
+textarea:focus{outline:none}
+pre{flex:1;margin:0;padding:12px;overflow:auto;font:13px/1.65 var(--mono);
+background:#0b0e12;white-space:pre-wrap;word-break:break-word}
+.k{color:var(--pink)}.s{color:var(--accent)}.n{color:var(--amber)}.b{color:var(--blue)}
+.status{padding:7px 12px;border-top:1px solid var(--line);font:11.5px/1.6 var(--mono);
+color:var(--dim);display:flex;gap:14px;flex-wrap:wrap}
+.status b{font-weight:600}
+.ok{color:var(--accent)}.bad{color:var(--red)}
+.q{color:var(--amber)}.sv{color:var(--accent)}.rt{color:var(--blue)}
+footer{padding:7px 16px;border-top:1px solid var(--line);color:var(--dim);
+font:11.5px/1.5 var(--mono);display:flex;gap:16px;flex-wrap:wrap}
+a{color:var(--dim)}a:hover{color:var(--accent)}
+</style></head><body>
+
+<header>
+  <h1>dep <span>— typed decisions, not text</span></h1>
+  <div class="presets">
+    <label class="pick">
+      <span>Try</span>
+      <select id="ex" onchange="load(this.value)">
+        <option value="noul">Yes or no — did they announce a quota reset?</option>
+        <option value="choice">Pick one — which team gets this ticket?</option>
+        <option value="score">Rate it — how bad is this outage?</option>
+        <option value="mixed" selected>All three at once — judge a release note</option>
+      </select>
+    </label>
+    <button onclick="burst()" id="bz" title="fire 20 requests at the same time and watch them queue">Stress test</button>
+    <button onclick="curlIt()">Copy as curl</button>
+  </div>
+  <div class="meter" id="meter"></div>
+</header>
+
+<main>
+  <div class="pane">
+    <div class="bar">POST /api/decide <span class="r">⌘/Ctrl+Enter to run</span></div>
+    <textarea id="req" spellcheck="false"></textarea>
+    <div class="status"><span id="reqinfo">—</span>
+      <button class="go" style="margin-left:auto" id="run" onclick="run()">Run</button></div>
+  </div>
+
+  <div class="pane">
+    <div class="bar">Response <span class="r" id="code"></span></div>
+    <pre id="res">// Run a request.</pre>
+    <div class="status" id="timing"></div>
+  </div>
+</main>
+
+<footer>
+  <span>Ternary Bonsai 2 27B · ~1.72 bits/weight · one RTX 3090 Ti</span>
+  <span>8 slots × 16k ctx · queue admits 8 model calls · up to 4 questions run in parallel</span>
+  <span>no tokens billed · 30 req/min/IP</span>
+  <a href="/api/docs">/api/docs</a>
+</footer>
+
+<script>
+const P = {
+
+noul: {
+  state: "Codex outage resolved. We suffered a minor outage for the last 45 minutes which turned into a global outage for logged-out users. Sorry about that — we have reset everyone's limits for the day.",
+  questions: {
+    is_quota_reset: {
+      type: "noul",
+      instructions: "Does this announce that usage limits or quota have been reset, refreshed, credited back or extended?",
+      criteria: {
+        true: "limits were or will be reset — even if mentioned only in passing at the end",
+        false: "merely discusses or displays limits, or is unrelated"
+      }
+    }
+  }
+},
+
+choice: {
+  state: "I was charged twice for Pro this month and nobody replied to my two emails. Third time. Refund today or I cancel.",
+  questions: {
+    route: {
+      type: "choice",
+      instructions: "Which team should handle this?",
+      criteria: {
+        billing: "charges, refunds, invoices",
+        technical: "bugs, outages, errors",
+        account: "login, security, access",
+        feedback: "ideas or complaints with no action to take"
+      }
+    }
+  }
+},
+
+score: {
+  state: "Third outage this quarter. Two hours of downtime, checkout was completely dead, and support never picked up the phone.",
+  questions: {
+    severity: {
+      type: "score",
+      instructions: "How severe is this incident for the business?",
+      criteria: ["trivial", "minor", "moderate", "serious", "critical"]
+    }
+  }
+},
+
+mixed: {
+  state: "Postgres 18.2 ships tomorrow. It cuts p99 latency on partitioned tables by 40% and fixes CVE-2026-1188, a privilege-escalation bug in logical replication. No config changes required.",
+  questions: {
+    is_security: {
+      type: "noul",
+      instructions: "Does this involve a security vulnerability?"
+    },
+    kind: {
+      type: "choice",
+      instructions: "What kind of release is this?",
+      criteria: {
+        security_patch: "fixes a vulnerability",
+        performance: "speed or resource improvements",
+        feature: "new capabilities",
+        mixed: "several of the above at once"
+      }
+    },
+    upgrade_urgency: {
+      type: "score",
+      instructions: "How urgently should a production team upgrade?",
+      criteria: ["next quarter", "next month", "this sprint", "this week", "tonight"]
+    },
+    breaking: {
+      type: "noul",
+      instructions: "Does this require users to change their own code or config?"
+    }
+  }
+}
+
+};
+
+const $ = id => document.getElementById(id);
+const req = $('req');
+
+function load(k){ req.value = JSON.stringify(P[k], null, 2); check(); }
+
+const MAXQ = 4;
+
+function check(){
+  try{
+    const b = JSON.parse(req.value);
+    const n = Object.keys(b.questions||{}).length;
+    $('reqinfo').innerHTML = `<span class="ok">valid JSON</span> · `+
+      `<b>${n}/${MAXQ}</b> question${n===1?'':'s'} · ${(b.state||'').length} chars of state · `+
+      (n>1 ? `<span class="sv">${n} model calls in parallel</span>` : `1 model call`);
+    return b;
+  }catch(e){ $('reqinfo').innerHTML = `<span class="bad">invalid JSON: ${e.message}</span>`; return null; }
+}
+req.addEventListener('input', check);
+req.addEventListener('keydown', e=>{
+  if((e.metaKey||e.ctrlKey) && e.key==='Enter'){ e.preventDefault(); run(); }
+  if(e.key==='Tab'){ e.preventDefault(); const s=req.selectionStart;
+    req.value=req.value.slice(0,s)+'  '+req.value.slice(req.selectionEnd);
+    req.selectionStart=req.selectionEnd=s+2; }
+});
+
+function hl(o){
+  return JSON.stringify(o,null,2)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/"([^"\\]*(\\.[^"\\]*)*)":/g,'<span class="k">"$1"</span>:')
+    .replace(/: "([^"\\]*(\\.[^"\\]*)*)"/g,': <span class="s">"$1"</span>')
+    .replace(/: (-?\d+\.?\d*(e[-+]?\d+)?)/gi,': <span class="n">$1</span>')
+    .replace(/: (true|false|null)/g,': <span class="b">$1</span>');
+}
+
+async function run(){
+  const b = check(); if(!b) return;
+  const btn=$('run'); btn.disabled=true; btn.textContent='…';
+  $('code').textContent=''; $('timing').textContent='';
+  const t0=performance.now();
+  try{
+    const r = await fetch('/api/decide',{method:'POST',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
+    const j = await r.json();
+    const rtt = Math.round(performance.now()-t0);
+    $('code').innerHTML = `<span class="${r.ok?'ok':'bad'}">HTTP ${r.status}</span> · ${rtt} ms round-trip`;
+    $('res').innerHTML = hl(j);
+    if(r.ok && j.timing_ms){
+      const t=j.timing_ms, q=j.queue;
+      $('timing').innerHTML =
+        `<span><b class="q">queued</b> ${t.queued} ms</span>`+
+        `<span><b class="sv">served</b> ${t.served} ms</span>`+
+        `<span><b class="rt">routing</b> ${t.routing} ms</span>`+
+        `<span><b>total</b> ${t.total} ms</span>`+
+        `<span>on arrival: ${q.busy_on_arrival}/${q.slots} busy, ${q.waiting_on_arrival} waiting</span>`+
+        (q.model_calls>1 ? `<span>${q.model_calls} calls <b class="sv">parallel</b>, `+
+          `critical path <b>${q.critical_path}</b></span>` : '');
+    }
+  }catch(e){
+    $('code').innerHTML='<span class="bad">network error</span>';
+    $('res').textContent=String(e);
+  }finally{ btn.disabled=false; btn.textContent='Run'; }
+}
+
+function curlIt(){
+  const b=check(); if(!b) return;
+  const c = `curl -X POST ${location.origin}/api/decide \\\n  -H 'Content-Type: application/json' \\\n  -d '${JSON.stringify(b)}'`;
+  navigator.clipboard.writeText(c).then(()=>{
+    const e=event.target, o=e.textContent; e.textContent='copied ✓';
+    setTimeout(()=>e.textContent=o,1200);
+  });
+}
+
+async function burst(){
+  const b=check(); if(!b) return;
+  const btn=$('bz'); btn.disabled=true; btn.textContent='firing…';
+  const t0=performance.now();
+  const rs=(await Promise.all([...Array(20)].map(()=>
+    fetch('/api/decide',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(b)}).then(r=>r.ok?r.json():null).catch(()=>null)))).filter(Boolean);
+  const wall=Math.round(performance.now()-t0);
+  rs.sort((a,c)=>a.timing_ms.queued-c.timing_ms.queued);
+  const pad=(v,n)=>String(v).padStart(n);
+  $('code').innerHTML=`<span class="ok">burst</span> · 20 requests · ${rs.length} ok · wall ${wall} ms`;
+  $('res').innerHTML =
+    `<span class="k">//  #   queued   served  routing    total   busy@arrival</span>\n`+
+    rs.map((d,i)=>{const t=d.timing_ms,q=d.queue;
+      return `${pad(i,4)} <span class="n">${pad(t.queued,8)}</span> <span class="n">${pad(t.served,8)}</span>`+
+             ` <span class="n">${pad(t.routing,8)}</span> <span class="n">${pad(t.total,8)}</span>`+
+             `   <span class="b">${q.busy_on_arrival}/${q.slots}+${q.waiting_on_arrival}w</span>`;}).join('\n')+
+    `\n\n<span class="k">// 8 slots, so the queue column steps in waves of 8.</span>`;
+  $('timing').innerHTML=`<span>peak queue wait <b class="q">${Math.max(...rs.map(r=>r.timing_ms.queued))} ms</b></span>`+
+    `<span>avg served <b class="sv">${Math.round(rs.reduce((s,r)=>s+r.timing_ms.served,0)/rs.length)} ms</b></span>`+
+    `<span>avg routing <b class="rt">${(rs.reduce((s,r)=>s+r.timing_ms.routing,0)/rs.length).toFixed(1)} ms</b></span>`;
+  btn.disabled=false; btn.textContent='burst×20';
+}
+
+async function poll(){
+  try{
+    const s=await (await fetch('/api/stats')).json();
+    $('meter').innerHTML=[...Array(s.slots)].map((_,i)=>
+      `<span class="slot ${i<s.active?'on':''}"></span>`).join('')+
+      `<span style="margin-left:7px">${s.active}/${s.slots}</span>`+
+      (s.waiting?`<span style="color:var(--amber)"> · ${s.waiting} queued</span>`:'');
+  }catch(e){}
+}
+setInterval(poll,700); poll();
+load($('ex').value);   // refresh always refills the selected example
+</script></body></html>
