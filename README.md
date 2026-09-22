@@ -58,10 +58,10 @@ curl -X POST localhost:8000/api/decide -H 'Content-Type: application/json' -d '{
 
 ```json
 {"answers": {
-   "is_quota_reset": {"type": "noul", "noul": 0.9544,
-                      "certainty": {"margin": 0.9088, "normalized": 0.7320}},
-   "urgency": {"type": "choice", "choice": "today", "probabilities": {...},
-               "certainty": {"margin": 0.34, "effective_options": 2.09}}},
+   "is_quota_reset": {"type": "noul", "noul": 0.9544, "confidence": 0.9087},
+   "urgency": {"type": "choice", "choice": "today",
+               "probabilities": {"ignore": 0.01, "today": 0.67, "now": 0.32},
+               "confidence": 0.35}},
  "timing_ms": {"queued": 1.1, "served": 503.7, "routing": 0.6, "total": 505.4}}
 ```
 
