@@ -46,7 +46,10 @@ def rate_limit(req: Request):
     while q and now - q[0] > 60:
         q.popleft()
     if len(q) >= RATE_PER_MIN:
-        raise HTTPException(429, f"rate limit: {RATE_PER_MIN} requests/min per IP")
+        wait = int(60 - (now - q[0])) + 1
+        raise HTTPException(429, f"You have used this playground {RATE_PER_MIN} times "
+                                 f"in the last minute, which is the per-IP limit. "
+                                 f"Try again in about {wait}s.")
     q.append(now)
 
 
@@ -88,7 +91,8 @@ def _one_call(state: str, name: str, q: Question, t_arrive: float) -> Tuple[str,
     got = _slots.acquire(timeout=SLOT_TIMEOUT_S)
     _bump("waiting", -1)
     if not got:
-        raise TimeoutError(f"{name}: waited {SLOT_TIMEOUT_S}s for a free slot")
+        raise TimeoutError(f"Question '{name}' waited {SLOT_TIMEOUT_S}s and never got one "
+                           f"of the {SLOTS} slots. The server is saturated right now.")
     t_slot = time.perf_counter()
     _bump("active")
     try:
@@ -113,7 +117,9 @@ async def decide(body: Req, request: Request) -> Dict[str, Any]:
         raise HTTPException(400, f"at most {MAX_QUESTIONS} questions per request")
     if stats["waiting"] >= MAX_WAITING:
         _bump("rejected")
-        raise HTTPException(503, f"queue full ({MAX_WAITING} calls waiting) — retry shortly")
+        raise HTTPException(503, f"The queue is full: {stats['waiting']} model calls are "
+                                 f"already waiting for {SLOTS} slots. Everyone is hammering "
+                                 f"it at once — try again in a few seconds.")
 
     busy, waiting = stats["active"], stats["waiting"]
     loop = asyncio.get_running_loop()
@@ -157,9 +163,12 @@ async def decide(body: Req, request: Request) -> Dict[str, Any]:
 @app.get("/api/stats")
 def get_stats() -> Dict[str, Any]:
     r = stats["requests"] or 1
+    busy = stats["active"] >= SLOTS
     return {"slots": SLOTS, "active": stats["active"], "waiting": stats["waiting"],
             "requests": stats["requests"], "calls": stats["calls"],
-            "rejected": stats["rejected"],
+            "rejected": stats["rejected"], "busy": busy,
+            "max_waiting": MAX_WAITING, "max_questions": MAX_QUESTIONS,
+            "rate_per_min": RATE_PER_MIN, "slot_timeout_s": SLOT_TIMEOUT_S,
             "avg_queued_ms": round(stats["total_wait_ms"] / r, 1),
             "peak_queued_ms": round(stats["peak_wait_ms"], 1)}
 
