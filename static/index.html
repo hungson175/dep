@@ -29,7 +29,7 @@ overflow:hidden;background:#0b0e12}
 background:#161b23;color:var(--dim);font-size:12px;font-weight:600;
 text-transform:uppercase;letter-spacing:.09em;border-right:1px solid var(--line)}
 select{appearance:none;background:transparent;color:var(--fg);border:0;
-padding:8px 32px 8px 11px;font:13.5px/1.2 inherit;cursor:pointer;min-width:310px;
+padding:8px 32px 8px 11px;font:13.5px/1.2 inherit;cursor:pointer;min-width:395px;
 background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5L6 8l3.5-3.5' stroke='%238b95a5' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
 background-repeat:no-repeat;background-position:right 11px center}
 select:focus{outline:none}
@@ -92,10 +92,10 @@ a{color:var(--dim)}a:hover{color:var(--accent)}
     <label class="pick">
       <span>Try</span>
       <select id="ex" onchange="load(this.value)">
-        <option value="noul">Yes or no — did they announce a quota reset?</option>
-        <option value="choice">Pick one — which team gets this ticket?</option>
-        <option value="score">Rate it — how bad is this outage?</option>
-        <option value="mixed" selected>All three at once — judge a release note</option>
+        <option value="choice" selected>choice — pick one option  ·  route a support ticket</option>
+        <option value="noul">noul — yes / no, with a probability  ·  spot a quota reset</option>
+        <option value="score">score — rate on a scale  ·  how bad is this outage</option>
+        <option value="mixed">all three at once  ·  4 questions, run in parallel</option>
       </select>
     </label>
     <button onclick="burst()" id="bz" title="fire 20 requests at the same time and watch them queue">Stress test</button>
