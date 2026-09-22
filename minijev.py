@@ -82,33 +82,18 @@ def decide(prompt, labels):
     return {k: v / z for k, v in e.items()}
 
 
-# ---- uncertainty ---------------------------------------------------------
-#
-# max(p) is "least confidence": it reads one number and throws the rest of the
-# distribution away, so {.5, .49, .01} and {.5, .05 x10} score identically even
-# though the first is a coin flip and the second is a reasonable call. It is also
-# floored at 1/N, so it is not comparable between a 2-option and a 6-option
-# question. These are the standard alternatives.
+# ---- confidence ----------------------------------------------------------
 
 
-def categorical_certainty(p):
-    """Uncertainty of a nominal distribution (no order between the options)."""
-    n = len(p)
-    vals = sorted(p.values(), reverse=True)
-    h = -sum(v * math.log(v) for v in vals if v > 0)     # Shannon entropy, nats
-    h_max = math.log(n) if n > 1 else 0.0
-    return {
-        "p_top": round(vals[0], 4),
-        # margin = top minus runner-up. 0 means a dead tie between two options,
-        # which is the failure max(p) cannot see.
-        "margin": round(vals[0] - (vals[1] if n > 1 else 0.0), 4),
-        "entropy_bits": round(h / math.log(2), 4),
-        # how many options the model is effectively still weighing: 1 = decided,
-        # n = no idea. This is perplexity, and it is the intuitive one.
-        "effective_options": round(math.exp(h), 3),
-        # 0 = uniform, 1 = one-hot. Comparable across different n, unlike p_top.
-        "normalized": round(1 - h / h_max, 4) if h_max else 1.0,
-    }
+def confidence(p):
+    """Top probability minus the runner-up.
+
+    Not max(p): that is floored at 1/N, so 0.50 means "coin flip" with two options
+    and "quite sure" with six, and it cannot tell {.50, .49} from {.50, .05 x10}.
+    The margin is 0 for a dead tie and 1 for certainty whatever N is.
+    """
+    top2 = sorted(p.values(), reverse=True)[:2]
+    return round(top2[0] - (top2[1] if len(top2) > 1 else 0.0), 4)
 
 
 # ---- the primitives, built on decide() ----------------------------------
@@ -123,7 +108,7 @@ def noul(state, question, criteria=None):
     body = (f"Text:\n{state}\n\nQuestion: {question}{crit}\n"
             "Reply with exactly one word: Yes or No.")
     p = decide(_ASK.format(body=body), {"true": " Yes", "false": " No"})
-    return p["true"], categorical_certainty(p)
+    return p["true"], confidence(p)
 
 
 def choice(state, question, options):
@@ -133,4 +118,19 @@ def choice(state, question, options):
     body = (f"Text:\n{state}\n\nQuestion: {question}\nOptions:\n{menu}\n"
             "Reply with exactly one digit.")
     p = decide(_ASK.format(body=body), {k: f" {i+1}" for i, k in enumerate(keys)})
-    return p, categorical_certainty(p)
+    return p, confidence(p)
+
+
+def score(state, question, levels):
+    """Ordered rubric -> probability-weighted value, plus the distribution.
+
+    Same one token as choice; the only difference is the last line. choice takes
+    the argmax because its options have no order. Here they do, so the expectation
+    E[i] = sum(i * p_i) is meaningful and turns N integer levels into one real
+    number -- no fine-tuning, no regression head.
+    """
+    menu = "\n".join(f"{i+1}. {d}" for i, d in enumerate(levels))
+    body = (f"Text:\n{state}\n\nQuestion: {question}\nScale:\n{menu}\n"
+            "Reply with exactly one digit.")
+    p = decide(_ASK.format(body=body), {str(i+1): f" {i+1}" for i in range(len(levels))})
+    return sum(int(k) * v for k, v in p.items()), p, confidence(p)

@@ -34,19 +34,15 @@ not from a smaller model.
 |---|---|
 | `noul` | probability that the answer is true |
 | `choice` | the pick, plus the full distribution over options |
+| `score` | probability-weighted value over an ordered rubric |
 
-Each answer carries a `certainty` block. It is **not** `max(p)` -- that reads one number
-and discards the shape of the distribution, so `{.50, .49, .01}` and `{.50, .05 x10}`
-score the same although the first is a coin flip. It is also floored at `1/N`, so it
-cannot be compared between a 2-option and a 6-option question. Instead:
+Every answer carries one `confidence` number: **the top probability minus the
+runner-up**.
 
-- `margin` -- top minus runner-up. Zero means a two-way tie, the case `max(p)` cannot see.
-- `entropy_bits` -- Shannon entropy over the whole distribution.
-- `effective_options` -- `exp(H)`. How many options the model is still weighing: 1 means
-  decided, N means no idea.
-- `normalized` -- `1 - H/log(N)`. 0 is uniform, 1 is one-hot, and it *is* comparable
-  across different N.
-
+Not `max(p)`. That is floored at `1/N`, so 0.50 means "coin flip" with two options and
+"fairly sure" with six, and it cannot tell `{.50, .49}` from `{.50, .05 x10}` — the first
+is a tie, the second is a clear call. The margin is 0 for a dead tie and 1 for certainty,
+whatever N is.
 
 ```bash
 curl -X POST localhost:8000/api/decide -H 'Content-Type: application/json' -d '{

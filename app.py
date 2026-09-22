@@ -7,7 +7,7 @@ which branch decided the latency, how long it waited, and how long it was served
 """
 import asyncio, collections, hashlib, hmac, os, threading, time
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Dict, Literal, Optional, Tuple
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
@@ -61,9 +61,9 @@ def rate_limit(req: Request):
 
 
 class Question(BaseModel):
-    type: Literal["noul", "choice"]
+    type: Literal["noul", "choice", "score"]
     instructions: str = Field(min_length=1, max_length=2000)
-    criteria: Optional[Dict[str, str]] = None
+    criteria: Optional[Union[Dict[str, str], List[str]]] = None
 
 
 class Req(BaseModel):
@@ -76,16 +76,23 @@ def _answer(state: str, name: str, q: Question) -> Dict[str, Any]:
         crit = q.criteria if isinstance(q.criteria, dict) and q.criteria else None
         if crit and not {"true", "false"} <= set(crit):
             raise ValueError(f"{name}: noul criteria needs 'true' and 'false' keys")
-        p, cert = minijev.noul(state, q.instructions, crit)
-        return {"type": "noul", "noul": round(p, 4), "certainty": cert}
+        p, conf = minijev.noul(state, q.instructions, crit)
+        return {"type": "noul", "noul": round(p, 4), "confidence": conf}
+
     if q.type == "choice":
         if not isinstance(q.criteria, dict) or len(q.criteria) < 2:
             raise ValueError(f"{name}: choice needs a criteria object with >=2 options")
-        p, cert = minijev.choice(state, q.instructions, q.criteria)
-        best = max(p, key=p.get)
-    return {"type": "choice", "choice": best,
-            "probabilities": {k: round(v, 4) for k, v in p.items()},
-            "certainty": cert}
+        p, conf = minijev.choice(state, q.instructions, q.criteria)
+        return {"type": "choice", "choice": max(p, key=p.get),
+                "probabilities": {k: round(v, 4) for k, v in p.items()},
+                "confidence": conf}
+
+    if not isinstance(q.criteria, list) or not 2 <= len(q.criteria) <= 10:
+        raise ValueError(f"{name}: score needs an ordered list of 2-10 levels")
+    v, dist, conf = minijev.score(state, q.instructions, q.criteria)
+    return {"type": "score", "score": round(v, 3), "levels": len(q.criteria),
+            "distribution": {k: round(x, 4) for k, x in dist.items()},
+            "confidence": conf}
 
 
 def _one_call(state: str, name: str, q: Question, t_arrive: float) -> Tuple[str, Dict, float, float]:

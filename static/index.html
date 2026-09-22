@@ -100,7 +100,8 @@ a{color:var(--dim)}a:hover{color:var(--accent)}
       <select id="ex" onchange="load(this.value)">
         <option value="choice" selected>choice — pick one option  ·  route a support ticket</option>
         <option value="noul">noul — yes / no, with a probability  ·  spot a quota reset</option>
-        <option value="mixed">both, 4 questions at once  ·  run in parallel</option>
+        <option value="score">score — rate on an ordered scale  ·  how bad is this outage</option>
+        <option value="mixed">all three, 4 questions at once  ·  run in parallel</option>
       </select>
     </label>
     <button onclick="askPw()" id="bz" title="fire 20 requests at the same time and watch them queue">Stress test</button>
@@ -172,6 +173,17 @@ choice: {
   }
 },
 
+score: {
+  state: "Third outage this quarter. Two hours of downtime, checkout was completely dead, and support never picked up the phone.",
+  questions: {
+    severity: {
+      type: "score",
+      instructions: "How severe is this incident for the business?",
+      criteria: ["trivial", "minor", "moderate", "serious", "critical"]
+    }
+  }
+},
+
 mixed: {
   state: "Postgres 18.2 ships tomorrow. It cuts p99 latency on partitioned tables by 40% and fixes CVE-2026-1188, a privilege-escalation bug in logical replication. No config changes required.",
   questions: {
@@ -189,15 +201,10 @@ mixed: {
         mixed: "several of the above at once"
       }
     },
-    when_to_upgrade: {
-      type: "choice",
-      instructions: "When should a production team upgrade?",
-      criteria: {
-        tonight: "a live vulnerability, do not wait",
-        this_week: "important but not on fire",
-        next_sprint: "nice to have",
-        never: "does not apply to us"
-      }
+    upgrade_urgency: {
+      type: "score",
+      instructions: "How urgently should a production team upgrade?",
+      criteria: ["next quarter", "next month", "this sprint", "this week", "tonight"]
     },
     breaking: {
       type: "noul",
