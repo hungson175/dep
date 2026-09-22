@@ -80,14 +80,14 @@ def _answer(state: str, name: str, q: Question) -> Dict[str, Any]:
         return {"type": "noul", "noul": round(p, 4), "confidence": conf}
 
     if q.type == "choice":
-        if not isinstance(q.criteria, dict) or len(q.criteria) < 2:
-            raise ValueError(f"{name}: choice needs a criteria object with >=2 options")
+        if not isinstance(q.criteria, dict) or not 2 <= len(q.criteria) <= 35:
+            raise ValueError(f"{name}: choice needs a criteria object with 2-35 options")
         p, conf = minijev.choice(state, q.instructions, q.criteria)
         return {"type": "choice", "choice": max(p, key=p.get),
                 "probabilities": {k: round(v, 4) for k, v in p.items()},
                 "confidence": conf}
 
-    if not isinstance(q.criteria, list) or not 2 <= len(q.criteria) <= 10:
+    if not isinstance(q.criteria, list) or not 2 <= len(q.criteria) <= 35:
         raise ValueError(f"{name}: score needs an ordered list of 2-10 levels")
     v, dist, conf = minijev.score(state, q.instructions, q.criteria)
     return {"type": "score", "score": round(v, 3), "levels": len(q.criteria),

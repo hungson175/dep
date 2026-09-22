@@ -96,6 +96,17 @@ def confidence(p):
     return round(top2[0] - (top2[1] if len(top2) > 1 else 0.0), 4)
 
 
+def _marks(n):
+    """n single-token answer marks. Digits run out at 9 (" 10" is two tokens),
+    so anything larger continues with letters."""
+    digits = [str(i) for i in range(1, 10)]
+    letters = [chr(ord("A") + i) for i in range(26)]
+    pool = digits + letters
+    if n > len(pool):
+        raise ValueError(f"at most {len(pool)} options, got {n}")
+    return pool[:n]
+
+
 # ---- the primitives, built on decide() ----------------------------------
 
 _ASK = ("<|im_start|>user\n{body}<|im_end|>\n"
@@ -114,10 +125,11 @@ def noul(state, question, criteria=None):
 def choice(state, question, options):
     """options: {name: description}. Returns {name: probability}."""
     keys = list(options)
-    menu = "\n".join(f"{i+1}. {k} -- {options[k]}" for i, k in enumerate(keys))
+    marks = _marks(len(keys))
+    menu = "\n".join(f"{m}. {k} -- {options[k]}" for m, k in zip(marks, keys))
     body = (f"Text:\n{state}\n\nQuestion: {question}\nOptions:\n{menu}\n"
-            "Reply with exactly one digit.")
-    p = decide(_ASK.format(body=body), {k: f" {i+1}" for i, k in enumerate(keys)})
+            f"Reply with exactly one character: {', '.join(marks)}.")
+    p = decide(_ASK.format(body=body), {k: f" {m}" for k, m in zip(keys, marks)})
     return p, confidence(p)
 
 
@@ -129,8 +141,10 @@ def score(state, question, levels):
     E[i] = sum(i * p_i) is meaningful and turns N integer levels into one real
     number -- no fine-tuning, no regression head.
     """
-    menu = "\n".join(f"{i+1}. {d}" for i, d in enumerate(levels))
+    marks = _marks(len(levels))
+    menu = "\n".join(f"{m}. {d}" for m, d in zip(marks, levels))
     body = (f"Text:\n{state}\n\nQuestion: {question}\nScale:\n{menu}\n"
-            "Reply with exactly one digit.")
-    p = decide(_ASK.format(body=body), {str(i+1): f" {i+1}" for i in range(len(levels))})
+            f"Reply with exactly one character: {', '.join(marks)}.")
+    # rank i (1-based) carries the value, whatever mark was used to elicit it
+    p = decide(_ASK.format(body=body), {str(i + 1): f" {m}" for i, m in enumerate(marks)})
     return sum(int(k) * v for k, v in p.items()), p, confidence(p)
