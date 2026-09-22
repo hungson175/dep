@@ -111,25 +111,7 @@ def categorical_certainty(p):
     }
 
 
-def ordinal_certainty(p):
-    """Uncertainty of an ORDERED distribution (a score). Entropy ignores order,
-    so {1:.5, 5:.5} and {3:.5, 4:.5} would look identical -- they are not.
-    Dispersion around the mean is the right measure here."""
-    items = [(float(k), v) for k, v in p.items()]
-    mean = sum(k * v for k, v in items)
-    var = sum(v * (k - mean) ** 2 for k, v in items)
-    std = math.sqrt(var)
-    n = len(items)
-    # worst case: half the mass at each end of the scale
-    std_max = (n - 1) / 2 if n > 1 else 0.0
-    return {
-        "std": round(std, 4),
-        "normalized": round(1 - std / std_max, 4) if std_max else 1.0,
-        "p_top": round(max(v for _, v in items), 4),
-    }
-
-
-# ---- the three Jev primitives, built on decide() -------------------------
+# ---- the primitives, built on decide() ----------------------------------
 
 _ASK = ("<|im_start|>user\n{body}<|im_end|>\n"
         "<|im_start|>assistant\n<think></think>Answer:")
@@ -152,33 +134,3 @@ def choice(state, question, options):
             "Reply with exactly one digit.")
     p = decide(_ASK.format(body=body), {k: f" {i+1}" for i, k in enumerate(keys)})
     return p, categorical_certainty(p)
-
-
-def score(state, question, levels):
-    """levels: ordered list of descriptions. Returns probability-weighted value."""
-    menu = "\n".join(f"{i+1}. {d}" for i, d in enumerate(levels))
-    body = (f"Text:\n{state}\n\nQuestion: {question}\nScale:\n{menu}\n"
-            "Reply with exactly one digit.")
-    p = decide(_ASK.format(body=body), {str(i+1): f" {i+1}" for i in range(len(levels))})
-    return sum(int(k) * v for k, v in p.items()), p, ordinal_certainty(p)
-
-
-# ---- schema -> JSON ------------------------------------------------------
-
-def evaluate(state, schema, workers=4):
-    """schema: {field: ("noul"|"choice"|"score", question, spec)} -> plain dict.
-
-    Nothing is parsed: each answer is a token id looked up in the candidate map
-    we built ourselves, so a malformed or out-of-schema value cannot occur.
-    """
-    from concurrent.futures import ThreadPoolExecutor
-    kinds = {"noul": noul, "choice": choice, "score": score}
-
-    def one(item):
-        field, (kind, question, spec) = item
-        fn = kinds[kind]
-        return field, (fn(state, question) if spec is None
-                       else fn(state, question, spec))
-
-    with ThreadPoolExecutor(workers) as ex:
-        return dict(ex.map(one, schema.items()))

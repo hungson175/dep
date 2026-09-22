@@ -34,7 +34,6 @@ not from a smaller model.
 |---|---|
 | `noul` | probability that the answer is true |
 | `choice` | the pick, plus the full distribution over options |
-| `score` | probability-weighted value over an ordered rubric |
 
 Each answer carries a `certainty` block. It is **not** `max(p)` -- that reads one number
 and discards the shape of the distribution, so `{.50, .49, .01}` and `{.50, .05 x10}`
@@ -48,24 +47,25 @@ cannot be compared between a 2-option and a 6-option question. Instead:
 - `normalized` -- `1 - H/log(N)`. 0 is uniform, 1 is one-hot, and it *is* comparable
   across different N.
 
-`score` is ordinal, so entropy is the wrong tool there (`{1:.5, 5:.5}` and `{3:.5, 4:.5}`
-have identical entropy but are not equally uncertain). It reports the standard deviation
-around the mean instead, normalised by the worst case `(N-1)/2`.
 
 ```bash
 curl -X POST localhost:8000/api/decide -H 'Content-Type: application/json' -d '{
   "state": "Sorry about the outage — we have reset everyone'\''s limits for the day.",
   "questions": {
     "is_quota_reset": {"type": "noul", "instructions": "Does this announce a quota reset?"},
-    "urgency": {"type": "score", "instructions": "How urgent is this?",
-                "criteria": ["ignore", "later", "today", "now"]}
+    "urgency": {"type": "choice", "instructions": "How urgent is this?",
+                "criteria": {"ignore": "not relevant", "today": "act today",
+                             "now": "stop what you are doing"}}
   }
 }'
 ```
 
 ```json
-{"answers": {"is_quota_reset": {"type": "noul", "noul": 0.9544},
-             "urgency": {"type": "score", "score": 3.11, "levels": 4}},
+{"answers": {
+   "is_quota_reset": {"type": "noul", "noul": 0.9544,
+                      "certainty": {"margin": 0.9088, "normalized": 0.7320}},
+   "urgency": {"type": "choice", "choice": "today", "probabilities": {...},
+               "certainty": {"margin": 0.34, "effective_options": 2.09}}},
  "timing_ms": {"queued": 1.1, "served": 503.7, "routing": 0.6, "total": 505.4}}
 ```
 
