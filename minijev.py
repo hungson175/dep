@@ -82,6 +82,53 @@ def decide(prompt, labels):
     return {k: v / z for k, v in e.items()}
 
 
+# ---- uncertainty ---------------------------------------------------------
+#
+# max(p) is "least confidence": it reads one number and throws the rest of the
+# distribution away, so {.5, .49, .01} and {.5, .05 x10} score identically even
+# though the first is a coin flip and the second is a reasonable call. It is also
+# floored at 1/N, so it is not comparable between a 2-option and a 6-option
+# question. These are the standard alternatives.
+
+
+def categorical_certainty(p):
+    """Uncertainty of a nominal distribution (no order between the options)."""
+    n = len(p)
+    vals = sorted(p.values(), reverse=True)
+    h = -sum(v * math.log(v) for v in vals if v > 0)     # Shannon entropy, nats
+    h_max = math.log(n) if n > 1 else 0.0
+    return {
+        "p_top": round(vals[0], 4),
+        # margin = top minus runner-up. 0 means a dead tie between two options,
+        # which is the failure max(p) cannot see.
+        "margin": round(vals[0] - (vals[1] if n > 1 else 0.0), 4),
+        "entropy_bits": round(h / math.log(2), 4),
+        # how many options the model is effectively still weighing: 1 = decided,
+        # n = no idea. This is perplexity, and it is the intuitive one.
+        "effective_options": round(math.exp(h), 3),
+        # 0 = uniform, 1 = one-hot. Comparable across different n, unlike p_top.
+        "normalized": round(1 - h / h_max, 4) if h_max else 1.0,
+    }
+
+
+def ordinal_certainty(p):
+    """Uncertainty of an ORDERED distribution (a score). Entropy ignores order,
+    so {1:.5, 5:.5} and {3:.5, 4:.5} would look identical -- they are not.
+    Dispersion around the mean is the right measure here."""
+    items = [(float(k), v) for k, v in p.items()]
+    mean = sum(k * v for k, v in items)
+    var = sum(v * (k - mean) ** 2 for k, v in items)
+    std = math.sqrt(var)
+    n = len(items)
+    # worst case: half the mass at each end of the scale
+    std_max = (n - 1) / 2 if n > 1 else 0.0
+    return {
+        "std": round(std, 4),
+        "normalized": round(1 - std / std_max, 4) if std_max else 1.0,
+        "p_top": round(max(v for _, v in items), 4),
+    }
+
+
 # ---- the three Jev primitives, built on decide() -------------------------
 
 _ASK = ("<|im_start|>user\n{body}<|im_end|>\n"
@@ -94,7 +141,7 @@ def noul(state, question, criteria=None):
     body = (f"Text:\n{state}\n\nQuestion: {question}{crit}\n"
             "Reply with exactly one word: Yes or No.")
     p = decide(_ASK.format(body=body), {"true": " Yes", "false": " No"})
-    return p["true"]
+    return p["true"], categorical_certainty(p)
 
 
 def choice(state, question, options):
@@ -104,7 +151,7 @@ def choice(state, question, options):
     body = (f"Text:\n{state}\n\nQuestion: {question}\nOptions:\n{menu}\n"
             "Reply with exactly one digit.")
     p = decide(_ASK.format(body=body), {k: f" {i+1}" for i, k in enumerate(keys)})
-    return p
+    return p, categorical_certainty(p)
 
 
 def score(state, question, levels):
@@ -113,7 +160,7 @@ def score(state, question, levels):
     body = (f"Text:\n{state}\n\nQuestion: {question}\nScale:\n{menu}\n"
             "Reply with exactly one digit.")
     p = decide(_ASK.format(body=body), {str(i+1): f" {i+1}" for i in range(len(levels))})
-    return sum(int(k) * v for k, v in p.items())
+    return sum(int(k) * v for k, v in p.items()), p, ordinal_certainty(p)
 
 
 # ---- schema -> JSON ------------------------------------------------------

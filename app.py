@@ -76,20 +76,22 @@ def _answer(state: str, name: str, q: Question) -> Dict[str, Any]:
         crit = q.criteria if isinstance(q.criteria, dict) and q.criteria else None
         if crit and not {"true", "false"} <= set(crit):
             raise ValueError(f"{name}: noul criteria needs 'true' and 'false' keys")
-        return {"type": "noul", "noul": round(minijev.noul(state, q.instructions, crit), 4)}
+        p, cert = minijev.noul(state, q.instructions, crit)
+        return {"type": "noul", "noul": round(p, 4), "certainty": cert}
     if q.type == "choice":
         if not isinstance(q.criteria, dict) or len(q.criteria) < 2:
             raise ValueError(f"{name}: choice needs a criteria object with >=2 options")
-        p = minijev.choice(state, q.instructions, q.criteria)
+        p, cert = minijev.choice(state, q.instructions, q.criteria)
         best = max(p, key=p.get)
         return {"type": "choice", "choice": best,
                 "probabilities": {k: round(v, 4) for k, v in p.items()},
-                "confidence": round(p[best], 4)}
+                "certainty": cert}
     if not isinstance(q.criteria, list) or not 2 <= len(q.criteria) <= 10:
         raise ValueError(f"{name}: score needs an ordered list of 2-10 levels")
-    return {"type": "score",
-            "score": round(minijev.score(state, q.instructions, q.criteria), 3),
-            "levels": len(q.criteria)}
+    v, dist, cert = minijev.score(state, q.instructions, q.criteria)
+    return {"type": "score", "score": round(v, 3), "levels": len(q.criteria),
+            "distribution": {k: round(x, 4) for k, x in dist.items()},
+            "certainty": cert}
 
 
 def _one_call(state: str, name: str, q: Question, t_arrive: float) -> Tuple[str, Dict, float, float]:

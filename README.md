@@ -36,6 +36,22 @@ not from a smaller model.
 | `choice` | the pick, plus the full distribution over options |
 | `score` | probability-weighted value over an ordered rubric |
 
+Each answer carries a `certainty` block. It is **not** `max(p)` -- that reads one number
+and discards the shape of the distribution, so `{.50, .49, .01}` and `{.50, .05 x10}`
+score the same although the first is a coin flip. It is also floored at `1/N`, so it
+cannot be compared between a 2-option and a 6-option question. Instead:
+
+- `margin` -- top minus runner-up. Zero means a two-way tie, the case `max(p)` cannot see.
+- `entropy_bits` -- Shannon entropy over the whole distribution.
+- `effective_options` -- `exp(H)`. How many options the model is still weighing: 1 means
+  decided, N means no idea.
+- `normalized` -- `1 - H/log(N)`. 0 is uniform, 1 is one-hot, and it *is* comparable
+  across different N.
+
+`score` is ordinal, so entropy is the wrong tool there (`{1:.5, 5:.5}` and `{3:.5, 4:.5}`
+have identical entropy but are not equally uncertain). It reports the standard deviation
+around the mean instead, normalised by the worst case `(N-1)/2`.
+
 ```bash
 curl -X POST localhost:8000/api/decide -H 'Content-Type: application/json' -d '{
   "state": "Sorry about the outage — we have reset everyone'\''s limits for the day.",
