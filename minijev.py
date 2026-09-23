@@ -7,6 +7,20 @@ model's true relative belief -- calibrated, not a guess parsed out of prose.
 """
 import functools, json, os, threading, time, urllib.request
 
+def _load_dotenv():
+    """Read .env next to this file. Real environment variables win."""
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+    if not os.path.exists(p):
+        return
+    for line in open(p):
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            k, v = line.split("=", 1)
+            os.environ.setdefault(k.strip(), v.strip().strip('"'))
+
+
+_load_dotenv()
+
 URL = os.environ.get("DEP_LLAMA_URL", "http://127.0.0.1:8080")
 BIAS = 50.0
 
