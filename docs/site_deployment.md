@@ -68,6 +68,26 @@ restart only `dep-playground.service`, and verify health. Retain the paid ledger
 and its reservations; never reset budget evidence to make a retry possible.
 Do not revert concurrent benchmark-agent commits or restart Bonsai/Cloudflare.
 
+## Verified release, 2026-10-06
+
+- Public health and stats returned HTTP 200 after startup. The live browser
+  journey passed: Bonsai initially selected, one real Bonsai decision, one real
+  DeepSeek decision with complete probability maps, and paid stress disabled.
+- The library page passed desktop/mobile layout checks and a real wheel download,
+  SHA-256 check, isolated offline installation and import.
+- The final offline suite ran 89 tests: 86 passed and three opt-in browser tests
+  skipped. The two live-site browser tests passed separately; they were not rerun.
+- The site ledger reported $0.0000324 charged against the $20 lifetime cap after
+  the DeepSeek verification call. This is an observed snapshot, not a future bill.
+- `dep-playground.service` was restarted for activation; the existing Bonsai
+  model service and Cloudflare ingress were left unchanged.
+- [The benchmark page](https://hungson175.github.io/dep/) was published from the
+  report-only `gh-pages` commit `71b7eee94d713a0951165a5c945500034d2ee3a4`.
+  GitHub reported the branch build complete; three static-page checks passed
+  against the public URL, including mobile layout and evidence downloads.
+- Publication is not an upstream JevBench submission. No official rank is claimed.
+  The application `main` branch has not been pushed as part of this publication.
+
 ## Bottom summary
 
 - Default: Bonsai, including existing API clients without a model field.

@@ -154,7 +154,11 @@ Failed candidate parsing still counts billed usage; no automatic retries,
 resume, option shuffling, truncation, or text fallback are performed. A rerun
 requires a new output folder and still uses the same budget ledger.
 
-Nothing here changes `app.py`, `minijev.py`, the live playground, or services.
+The benchmark commands do not deploy or restart services. The
+[live playground](https://dep.hungson175.com) separately offers a model selector:
+**Bonsai by default**, with optional DeepSeek Flash under a $20 lifetime site cap.
+Library downloads are available on its [library page](https://dep.hungson175.com/static/library.html).
+See the [deployment runbook](docs/site_deployment.md) for the server-side safeguards.
 
 Recorded **strict-policy** run: [DeepSeek Flash public JevBench, 2026-10-06](docs/benchmarks/deepseek_flash_public_20261006.md)
 — 178/231 correct (77.06%), p50 683 ms, cost upper bound $0.0411 total.
@@ -165,6 +169,21 @@ This is a public-only diagnostic, not a current official leaderboard score.
 This reuses the same saved responses with the new policy, not fresh inference.
 Development tests need the pinned public cache from the `fetch` step above;
 the library itself does not use the benchmark cache.
+
+## Published public results
+
+[Benchmark page](https://hungson175.github.io/dep/) ·
+[Bonsai public report on GitHub](https://github.com/hungson175/dep/blob/gh-pages/reports/bonsai_dep_public_20261006.md)
+
+**Bonsai-Dep: 187/231 (80.95%)**, all 231 distributions valid, p50 400 ms,
+p95 2210 ms on a shared RTX 3090 Ti. DeepSeek-Dep's zero-fill offline replay
+scores 190/231 (82.25%); this is not a fresh second API run.
+These are public-only diagnostics, **not official scores or rankings**.
+
+The report-only `gh-pages` branch contains the HTML page, aggregate `results.json`,
+and detailed reports, not keys, raw run logs or the application checkout.
+[Bonsai methodology and reproduction](docs/benchmarks/bonsai_dep_public_20261006.md)
+are recorded separately from the DeepSeek recipe above.
 
 ## Credit
 
