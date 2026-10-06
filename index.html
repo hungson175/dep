@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Public JevBench diagnostics for Bonsai-Dep and DeepSeek-Dep on the same 231 authored decisions. Reproducible evidence, not an official ranking.">
+<title>Dep benchmark — Bonsai &amp; DeepSeek</title>
+<style>
+:root{color-scheme:dark;--bg:#0d0f13;--fg:#e6e9ef;--dim:#a3afbf;--line:#29313d;--green:#6ee7a8;--blue:#7aa2f7;--mono:ui-monospace,"SF Mono",Consolas,monospace}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.65 Georgia,serif}.wrap{width:min(1060px,calc(100% - 48px));margin:auto}header{border-bottom:1px solid var(--line);font:12px/1.5 var(--mono)}nav{padding:22px 0;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}a{color:var(--green);text-underline-offset:4px}a:hover{color:white}a:focus-visible{outline:2px solid var(--green);outline-offset:5px}main{padding:60px 0 30px}.eyebrow{color:var(--green);font:11px/1.6 var(--mono);letter-spacing:.12em;text-transform:uppercase}h1{font-size:clamp(38px,6.5vw,72px);font-weight:400;line-height:1.08;letter-spacing:-.04em;margin:18px 0 24px}h2{font-size:30px;font-weight:400;margin:0 0 18px}p{color:var(--dim);max-width:820px}strong{color:var(--fg)}.note{border-left:2px solid #dcb468;padding:8px 18px;color:#d9c89d;background:#171710;font-size:15px;max-width:none}.scores{display:grid;grid-template-columns:1fr 1fr;margin:40px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.score{padding:28px 28px 30px 0}.score+ .score{padding-left:28px;border-left:1px solid var(--line)}.label{font:13px/1.5 var(--mono);color:var(--dim)}.number{font:clamp(36px,6vw,62px)/1.2 var(--mono);color:var(--green);margin:16px 0 12px}.score+ .score .number{color:var(--blue)}.small{font:11px/1.7 var(--mono);color:var(--dim)}section{padding:26px 0;border-bottom:1px solid var(--line)}.tablewrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font:12px/1.7 var(--mono)}th,td{text-align:left;padding:12px 12px 12px 0;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--green);font-weight:400}td{color:var(--dim)}code{font:12px/1.7 var(--mono);overflow-wrap:anywhere}.sources{display:flex;gap:18px;flex-wrap:wrap;font:12px/1.8 var(--mono)}footer{padding:24px 0 38px;font:11px/1.8 var(--mono);color:var(--dim)}ul{color:var(--dim);padding-left:20px}li{margin:9px 0}@media(max-width:600px){.wrap{width:calc(100% - 32px)}main{padding-top:36px}.scores{grid-template-columns:1fr}.score+ .score{padding-left:0;border-left:0;border-top:1px solid var(--line)}.number{font-size:44px}table{font-size:11px}}
+</style></head><body>
+<header><nav class="wrap"><span>dep / public benchmark notebook</span><a href="https://dep.hungson175.com">Try the playground ↗</a></nav></header>
+<main class="wrap">
+<div class="eyebrow">6 October 2026 · same 231 public decisions</div>
+<h1>Two backends.<br>One public test set.</h1>
+<p>Typed decisions from Bonsai-Dep and DeepSeek-Dep. No free-text parsing. No fine-tuning. Here are the measurements, the decoding-policy change, and the limits of this comparison.</p>
+<p class="note">This is a legacy authored public JevBench diagnostic, <strong>not an official leaderboard score or rank</strong>. It does not use the current sealed evaluation pool. Raw accuracy must not be compared to Capability or Composite scores.</p>
+<div class="scores">
+<div class="score"><div class="label">Bonsai-Dep / local ternary 27B</div><div class="number">80.95%</div><div class="small">187 / 231 correct · 231 / 231 valid<br>Fresh serial run · shared RTX 3090 Ti</div></div>
+<div class="score"><div class="label">DeepSeek-Dep / Flash one-token adapter</div><div class="number">82.25%</div><div class="small">190 / 231 correct · 231 / 231 valid<br>Zero-fill offline replay · no new inference</div></div>
+</div>
+<p>DeepSeek gets three more decisions right on this sample. Bonsai alone gets 8 right; DeepSeek alone gets 11 right. That small difference from one public pass does <strong>not establish a general winner</strong>.</p>
+<section><h2>Accuracy by question type</h2><div class="tablewrap"><table><thead><tr><th>Question type</th><th>Cases</th><th>Bonsai-Dep</th><th>DeepSeek-Dep</th></tr></thead><tbody>
+<tr><td>choice</td><td>139</td><td>117 / 139 · 84.17%</td><td>119 / 139 · 85.61%</td></tr>
+<tr><td>noul · true/false</td><td>74</td><td>56 / 74 · 75.68%</td><td>57 / 74 · 77.03%</td></tr>
+<tr><td>score · ordered levels</td><td>18</td><td>14 / 18 · 77.78%</td><td>14 / 18 · 77.78%</td></tr>
+<tr><td>Total</td><td>231</td><td>187 / 231 · 80.95%</td><td>190 / 231 · 82.25%</td></tr>
+</tbody></table></div></section>
+<section><h2>Latency and cost need context</h2><div class="tablewrap"><table><thead><tr><th>Measurement</th><th>Bonsai-Dep</th><th>DeepSeek-Dep</th></tr></thead><tbody>
+<tr><td>HTTP round-trip p50</td><td>400 ms</td><td>683 ms</td></tr>
+<tr><td>HTTP round-trip p95</td><td>2,210 ms</td><td>912 ms</td></tr>
+<tr><td>Inference cost / 1,000</td><td>Unknown — hardware/electricity unmeasured</td><td>$0.1779 — peak-tariff upper bound</td></tr>
+<tr><td>Provider API spend for run</td><td>$0 — local server</td><td>≤ $0.0411 — original API run</td></tr>
+</tbody></table></div>
+<p class="small">Serial measurements, not throughput or warmed-kernel timing. Bonsai latency includes initial uncached tokenization and a shared GPU; DeepSeek latency and cost are from the original API responses, not a new replay run. No retry occurred in either benchmark. Cost is not a measured provider invoice.</p></section>
+<section><h2>What changed for DeepSeek?</h2>
+<p>The original strict run scored <strong>178/231 (77.06%)</strong>, with 218 valid distributions and 13 missing-candidate failures. The new default returns 0% for unreported options and renormalizes available candidates. Replaying those exact saved responses recovers all 13 maps; 12 become correct and one remains wrong.</p>
+<p>All originally valid distributions stay unchanged. Zero-fill is a <strong>censored-probability approximation, not a measured zero</strong>; it can inflate confidence. All-missing or malformed reports still fail. The strict result and original evidence remain preserved.</p></section>
+<section><h2>Reproduction, not rank claims</h2><ul>
+<li>Bonsai: <code>Ternary-Bonsai-2-27B-PQ2_0.gguf</code>, llama.cpp, unchanged minijev prompts, equal +50 candidate bias, temperature 1, one output token, native candidate probabilities. No zero-fill was needed.</li>
+<li>DeepSeek: <code>deepseek-flash</code> (V4.1 Flash), unchanged notebook prompts, thinking off, temperature 1, one output token, top-20 logprobs, no logit bias.</li>
+<li>Same exact 231 public task IDs, same label scoring. Failed decisions stay in the denominator. Gold answers and provenance are not sent to either model.</li>
+<li>These runs do not prove adversarial safety, universal reliability, or empirical calibration. They do not benchmark Quyet or establish superiority over current official systems.</li>
+</ul><p class="small">Upstream pin: <code>bb05a335bc809e61b20c0f745d25499a82b326fc</code><br>Dataset hash: <code>dc3995d8ae1e2fc8e81ce38431add509eb8bb39b85aadfd0c7c32079382dde51</code></p></section>
+<section><h2>Evidence and downloads</h2><div class="sources">
+<a href="results.json">Machine-readable results + evidence hashes</a>
+<a href="reports/bonsai_dep_public_20261006.md">Bonsai full report</a>
+<a href="reports/deepseek_flash_public_20261006.md">DeepSeek original strict report</a>
+<a href="reports/deepseek_flash_zero_fill_replay_20261006.md">DeepSeek zero-fill replay</a>
+<a href="https://github.com/fstandhartinger/jevbench/tree/bb05a335bc809e61b20c0f745d25499a82b326fc">Pinned public benchmark source</a>
+<a href="https://dep.hungson175.com/static/library.html">Install the DeepSeek Python library</a>
+</div></section>
+</main><footer class="wrap">MIT-licensed project · public diagnostics only · raw run evidence remains local; no credentials or headers published.<br>Bonsai is the playground default. DeepSeek is optional, with a separately capped demo budget.</footer>
+</body></html>
