@@ -9,14 +9,14 @@
     {
       "name": "Bonsai-Dep",
       "planned": 231,
-      "correct": 187,
+      "correct": 188,
       "valid": 231,
-      "accuracy": 0.8095238095238095,
-      "evidence": "fresh_serial_local_run",
+      "accuracy": 0.8138528138528138,
+      "evidence": "fresh_serial_native_inprocess_run",
       "per_type": {
         "choice": {
           "count": 139,
-          "correct": 117
+          "correct": 118
         },
         "noul": {
           "count": 74,
@@ -27,13 +27,63 @@
           "correct": 14
         }
       },
-      "p50_s": 0.3996486789546907,
-      "p95_s": 2.209613333689049,
-      "brier": 0.2479369177889038,
-      "ece": 0.032853729811228284,
+      "p50_s": 0.139669698,
+      "p95_s": 1.724344335,
+      "brier": 0.2475696938003272,
+      "ece": 0.028877083547512384,
       "calibration_n": 231,
       "inference_cost_usd_per_1000": null,
-      "cost_basis": "hardware_and_electricity_unmeasured"
+      "cost_basis": "hardware_and_electricity_unmeasured",
+      "latency_basis": "native_inprocess_decision_wall",
+      "native_components": {
+        "tokenize": {
+          "n": 231,
+          "p50_s": 0.0008854300000000001,
+          "p95_s": 0.011144503
+        },
+        "reset": {
+          "n": 231,
+          "p50_s": 0.000545876,
+          "p95_s": 0.0006701005
+        },
+        "prefill": {
+          "n": 231,
+          "p50_s": 0.11295409399999999,
+          "p95_s": 1.691519178
+        },
+        "sample": {
+          "n": 231,
+          "p50_s": 0.022726042,
+          "p95_s": 0.0240461155
+        },
+        "decision": {
+          "n": 231,
+          "p50_s": 0.137855056,
+          "p95_s": 1.714217621
+        },
+        "local_total": {
+          "n": 231,
+          "p50_s": 0.139466615,
+          "p95_s": 1.724128194
+        },
+        "local_wall": {
+          "n": 231,
+          "p50_s": 0.139669698,
+          "p95_s": 1.724344335
+        }
+      },
+      "hardware": {
+        "gpu": "NVIDIA GeForce RTX 3090 Ti",
+        "full_gpu_offload": true,
+        "offloaded_layers": 65,
+        "ctx_size": 4096,
+        "batch_size": 2048,
+        "ubatch_size": 512,
+        "threads": 8,
+        "flash_attention": true
+      },
+      "warmup_count": 2,
+      "kv_cleared_each_case": true
     },
     {
       "name": "DeepSeek-Dep",
@@ -62,7 +112,8 @@
       "ece": 0.11102609761904045,
       "calibration_n": 231,
       "inference_cost_usd_per_1000": 0.17793766233766237,
-      "cost_basis": "original_API_peak_tariff_upper_bound"
+      "cost_basis": "original_API_peak_tariff_upper_bound",
+      "latency_basis": "provider_http_round_trip"
     }
   ],
   "deepseek_original_strict": {
@@ -73,19 +124,60 @@
   },
   "paired": {
     "bonsai_only_correct": 8,
-    "deepseek_only_correct": 11
+    "deepseek_only_correct": 10
   },
   "evidence_records_sha256": {
-    "bonsai": "0d33527e58544fa9b5aaa6a5583d270765a0bfe6186e15e5431e4d7d93491c19",
+    "bonsai": "f36834f59798601715c9879d26147be80bc77ea3a3c43df739777ef45e93a272",
     "deepseek_original": "c3fdc37233827ec55bdaf69acd0c4e33344092d5bd132363acd22c9ef8c6f3be",
-    "deepseek_zero_fill": "f075d24c7a0a1e620b95ec1a67cef9553965db720e6c4b1da645f1ff85c4c5db"
+    "deepseek_zero_fill": "f075d24c7a0a1e620b95ec1a67cef9553965db720e6c4b1da645f1ff85c4c5db",
+    "bonsai_original_http": "0d33527e58544fa9b5aaa6a5583d270765a0bfe6186e15e5431e4d7d93491c19",
+    "bonsai_native_output": "f04f383e89cbff8f8017bc21f771c6b70a9b8c467b1d70ae8ef18e9c96549c8d"
   },
   "official_score": null,
   "official_rank": null,
   "notes": [
-    "DeepSeek zero-fill is post-hoc decoding, not fresh inference; latency and cost come from the original API run.",
-    "Bonsai GPU was shared. Hardware/electricity not measured. No throughput claim.",
-    "Same exact public task IDs; failed decisions remain denominator. No tuning on gold labels.",
-    "ECE uses top-label probability, not the playground margin confidence. Diagnostics are not fitted calibration."
-  ]
+    "Bonsai was rerun in a native C++ process linked to the exact installed libllama; no HTTP/server/web path. All 65 layers on RTX3090Ti, two excluded warmups, KV cleared per case.",
+    "Bonsai headline latency is native decision wall time including tokenization/reset/prefill/probability extraction; model load/context setup/warmups/file IO excluded. Engine-only timings are separate.",
+    "Bonsai native and DeepSeek API timings are different measurement boundaries and not directly comparable; no official Speed score is computed.",
+    "Native Bonsai gets188/231. The archived HTTP run remains187/231; exact prompts/token IDs/token counts matched, one prediction changed, maximum probability delta0.01311.",
+    "DeepSeek zero-fill remains offline replay, not new inference; its API latency/cost remain the original run.",
+    "The current v1.6.1 P300 and scorer/O1S are not present in the public source checked; this231-case legacy diagnostic does not match that protocol.",
+    "Hardware/electricity unmeasured; no inference cost or official Capability/Composite/rank fabricated."
+  ],
+  "bonsai_original_http": {
+    "planned": 231,
+    "correct": 187,
+    "valid": 231,
+    "accuracy": 0.8095238095238095,
+    "p50_s": 0.3996486789546907,
+    "p95_s": 2.209613333689049,
+    "brier": 0.2479369177889038,
+    "ece": 0.032853729811228284,
+    "per_type": {
+      "choice": {
+        "count": 139,
+        "correct": 117
+      },
+      "noul": {
+        "count": 74,
+        "correct": 56
+      },
+      "score": {
+        "count": 18,
+        "correct": 14
+      }
+    },
+    "latency_basis": "http_round_trip_shared_gpu"
+  },
+  "official_protocol_alignment": {
+    "version": "v1.6.1",
+    "status": "not_matched_missing_public_dataset_and_scorer",
+    "current_public_planned": 300,
+    "current_sealed_planned": 1200,
+    "scorer_setting": "O1S",
+    "official_scorer_sha256": "02132271117653e6302c509232a581d0094f0e78eac8b1bfc67596fd5d5097e9",
+    "official_public_manifest_sha256": "6b2321f8359d87769a95c8e52135542d95ccdc353197e1e5c96abb9b616ce5ba",
+    "public_repo_main_pin_checked": "bb05a335bc809e61b20c0f745d25499a82b326fc",
+    "current_official_inference_performed": false
+  }
 }

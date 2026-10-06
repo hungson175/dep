@@ -13,23 +13,26 @@
 <p>Typed decisions from Bonsai-Dep and DeepSeek-Dep. No free-text parsing. No fine-tuning. Here are the measurements, the decoding-policy change, and the limits of this comparison.</p>
 <p class="note">This is a legacy authored public JevBench diagnostic, <strong>not an official leaderboard score or rank</strong>. It does not use the current sealed evaluation pool. Raw accuracy must not be compared to Capability or Composite scores.</p>
 <div class="scores">
-<div class="score"><div class="label">Bonsai-Dep / local ternary 27B</div><div class="number">80.95%</div><div class="small">187 / 231 correct · 231 / 231 valid<br>Fresh serial run · shared RTX 3090 Ti</div></div>
+<div class="score"><div class="label">Bonsai-Dep / local ternary 27B</div><div class="number">81.39%</div><div class="small">188 / 231 correct · 231 / 231 valid<br>Fresh native process · full GPU · no HTTP</div></div>
 <div class="score"><div class="label">DeepSeek-Dep / Flash one-token adapter</div><div class="number">82.25%</div><div class="small">190 / 231 correct · 231 / 231 valid<br>Zero-fill offline replay · no new inference</div></div>
 </div>
-<p>DeepSeek gets three more decisions right on this sample. Bonsai alone gets 8 right; DeepSeek alone gets 11 right. That small difference from one public pass does <strong>not establish a general winner</strong>.</p>
+<p>DeepSeek gets two more decisions right on this sample. Bonsai alone gets 8 right; DeepSeek alone gets 10 right. That small difference from one public pass does <strong>not establish a general winner</strong>.</p>
 <section><h2>Accuracy by question type</h2><div class="tablewrap"><table><thead><tr><th>Question type</th><th>Cases</th><th>Bonsai-Dep</th><th>DeepSeek-Dep</th></tr></thead><tbody>
-<tr><td>choice</td><td>139</td><td>117 / 139 · 84.17%</td><td>119 / 139 · 85.61%</td></tr>
+<tr><td>choice</td><td>139</td><td>118 / 139 · 84.89%</td><td>119 / 139 · 85.61%</td></tr>
 <tr><td>noul · true/false</td><td>74</td><td>56 / 74 · 75.68%</td><td>57 / 74 · 77.03%</td></tr>
 <tr><td>score · ordered levels</td><td>18</td><td>14 / 18 · 77.78%</td><td>14 / 18 · 77.78%</td></tr>
-<tr><td>Total</td><td>231</td><td>187 / 231 · 80.95%</td><td>190 / 231 · 82.25%</td></tr>
+<tr><td>Total</td><td>231</td><td>188 / 231 · 81.39%</td><td>190 / 231 · 82.25%</td></tr>
 </tbody></table></div></section>
 <section><h2>Latency and cost need context</h2><div class="tablewrap"><table><thead><tr><th>Measurement</th><th>Bonsai-Dep</th><th>DeepSeek-Dep</th></tr></thead><tbody>
-<tr><td>HTTP round-trip p50</td><td>400 ms</td><td>683 ms</td></tr>
-<tr><td>HTTP round-trip p95</td><td>2,210 ms</td><td>912 ms</td></tr>
+<tr><td>Timing boundary</td><td>Native local decision</td><td>Provider API round-trip</td></tr>
+<tr><td>p50 · different boundaries</td><td>139.67 ms</td><td>683 ms</td></tr>
+<tr><td>p95 · different boundaries</td><td>1724.34 ms</td><td>912 ms</td></tr>
+<tr><td>Native prefill-only p50 / p95</td><td>112.95 / 1691.52 ms</td><td>Not observable from API</td></tr>
 <tr><td>Inference cost / 1,000</td><td>Unknown — hardware/electricity unmeasured</td><td>$0.1779 — peak-tariff upper bound</td></tr>
-<tr><td>Provider API spend for run</td><td>$0 — local server</td><td>≤ $0.0411 — original API run</td></tr>
+<tr><td>Provider API spend for run</td><td>$0 — native local run</td><td>≤ $0.0411 — original API run</td></tr>
 </tbody></table></div>
-<p class="small">Serial measurements, not throughput or warmed-kernel timing. Bonsai latency includes initial uncached tokenization and a shared GPU; DeepSeek latency and cost are from the original API responses, not a new replay run. No retry occurred in either benchmark. Cost is not a measured provider invoice.</p></section>
+<p class="small">The native and API measurements are <strong>not directly comparable</strong>. Bonsai now runs libllama directly: model loaded once, two excluded warmups, all 65 layers on RTX3090Ti, KV cleared per case. Its wall time includes tokenization/reset/prefill/probability extraction, not load or disk IO. DeepSeek retains original API timings. No throughput or official Speed claim. Earlier Bonsai HTTP run: 187/231 (80.95%), p50 400ms / p95 2210ms; evidence preserved.</p></section>
+<section><h2>Official metrics: not yet matched</h2><p>The current board uses <strong>v1.6.1 / O1S: 300 public + 1,200 sealed</strong>. Its public P300 data and exact scorer have not been obtained and verified here; the public GitHub repository checked still exposes the legacy 231 cases. These accuracy/ECE/Brier diagnostics are not its Intelligence/Calibration axes or Capability/Composite. No substitute scorer, sealed score or rank is invented.</p><p class="small"><a href="https://benchmarkheaven.com/jev-models">Official method and board</a> · <a href="https://benchmarkheaven.com/api/jevbench/v1.6.1">Published protocol/scorer hashes</a>. Next gate: exact P300 + O1S scorer and conformance tests; sealed ranking requires organizer evaluation.</p></section>
 <section><h2>What changed for DeepSeek?</h2>
 <p>The original strict run scored <strong>178/231 (77.06%)</strong>, with 218 valid distributions and 13 missing-candidate failures. The new default returns 0% for unreported options and renormalizes available candidates. Replaying those exact saved responses recovers all 13 maps; 12 become correct and one remains wrong.</p>
 <p>All originally valid distributions stay unchanged. Zero-fill is a <strong>censored-probability approximation, not a measured zero</strong>; it can inflate confidence. All-missing or malformed reports still fail. The strict result and original evidence remain preserved.</p></section>
@@ -41,7 +44,8 @@
 </ul><p class="small">Upstream pin: <code>bb05a335bc809e61b20c0f745d25499a82b326fc</code><br>Dataset hash: <code>dc3995d8ae1e2fc8e81ce38431add509eb8bb39b85aadfd0c7c32079382dde51</code></p></section>
 <section><h2>Evidence and downloads</h2><div class="sources">
 <a href="results.json">Machine-readable results + evidence hashes</a>
-<a href="reports/bonsai_dep_public_20261006.md">Bonsai full report</a>
+<a href="reports/bonsai_dep_native_public_20261006.md">Bonsai native report + protocol gap</a>
+<a href="reports/bonsai_dep_public_20261006.md">Bonsai archived HTTP report</a>
 <a href="reports/deepseek_flash_public_20261006.md">DeepSeek original strict report</a>
 <a href="reports/deepseek_flash_zero_fill_replay_20261006.md">DeepSeek zero-fill replay</a>
 <a href="https://github.com/fstandhartinger/jevbench/tree/bb05a335bc809e61b20c0f745d25499a82b326fc">Pinned public benchmark source</a>
