@@ -143,6 +143,10 @@ requires a new output folder and still uses the same budget ledger.
 
 Nothing here changes `app.py`, `minijev.py`, the live playground, or services.
 
+Recorded run: [DeepSeek Flash public JevBench, 2026-10-06](docs/benchmarks/deepseek_flash_public_20261006.md)
+— 178/231 correct (77.06%), p50 683 ms, cost upper bound $0.0411 total.
+This is a public-only diagnostic, not a current official leaderboard score.
+
 ## Credit
 
 The one-token approach is how [TypeSafe's Jev](https://typesafe.ai) and
