@@ -20,6 +20,11 @@ class PackagingMetadataTests(unittest.TestCase):
         self.assertIn('include-package-data = false', text)
         self.assertTrue(Path('docs/dep_deepseek.md').is_file())
         self.assertTrue(Path('LICENSE').is_file())
+        self.assertIn('prune tests', Path('MANIFEST.in').read_text())
+        for name in ['README.md', 'docs/dep_deepseek.md']:
+            doc = Path(name).read_text()
+            self.assertIn('releases/download/dep-deepseek-v0.1.0/', doc)
+            self.assertIn('from dep_deepseek import DeepSeek', doc)
 
     def test_no_automatic_credentials_or_calls(self):
         import subprocess, sys

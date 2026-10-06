@@ -43,7 +43,7 @@ def validate_artifacts(wheel: Path, sdist: Path) -> dict:
             if archive.read(info + 'licenses/LICENSE') != (ROOT / 'LICENSE').read_bytes():
                 raise ValueError('Wheel license differs from source')
         prefix = f'dep_deepseek-{__version__}/'
-        allowed_source = set(MODULES + ['LICENSE', 'PKG-INFO', 'README.md', 'pyproject.toml', 'setup.cfg',
+        allowed_source = set(MODULES + ['LICENSE', 'MANIFEST.in', 'PKG-INFO', 'README.md', 'pyproject.toml', 'setup.cfg',
             'docs/dep_deepseek.md', 'dep_deepseek.egg-info/PKG-INFO',
             'dep_deepseek.egg-info/SOURCES.txt', 'dep_deepseek.egg-info/dependency_links.txt',
             'dep_deepseek.egg-info/top_level.txt'])
@@ -53,7 +53,7 @@ def validate_artifacts(wheel: Path, sdist: Path) -> dict:
                     or {m.name for m in members} != {prefix + n for n in allowed_source}
                     or len(members) != len(allowed_source)):
                 raise ValueError('Source archive contains missing or unexpected files')
-            for name in MODULES + ['LICENSE', 'pyproject.toml', 'docs/dep_deepseek.md']:
+            for name in MODULES + ['LICENSE', 'MANIFEST.in', 'pyproject.toml', 'docs/dep_deepseek.md']:
                 if archive.extractfile(prefix + name).read() != (ROOT / name).read_bytes():
                     raise ValueError('Source archive differs from tested source')
     except (zipfile.BadZipFile, tarfile.TarError, KeyError, EOFError):

@@ -4,22 +4,22 @@ Ask typed questions and receive answers with a complete probability map. The
 library handles prompts, one-token requests, option matching and normalization.
 No model download or runtime dependencies are needed. Python 3.10+ is supported.
 
-## Install from source
-
-From this repository, in your own virtual environment:
+## Install — no server or GPU needed
 
 ```bash
-python -m pip install .
+python -m pip install https://github.com/hungson175/dep/releases/download/dep-deepseek-v0.1.0/dep_deepseek-0.1.0-py3-none-any.whl
 ```
 
-This package is not yet published to PyPI. Existing users need the updated
-source or the locally built wheel, not an unpushed GitHub URL.
+Python 3.10+ and your own DeepSeek API key are the only requirements. This is a
+GitHub release, not a PyPI package. Do not use `pip install dep-deepseek`.
 
-To install the built wheel directly:
+Alternatively, install the pinned source:
 
 ```bash
-python -m pip install /path/to/dep_deepseek-0.1.0-py3-none-any.whl
+python -m pip install "git+https://github.com/hungson175/dep.git@dep-deepseek-v0.1.0"
 ```
+
+For local development, use `python -m pip install .` from this repository.
 
 Export your own `DEEPSEEK_API_KEY` securely in the launching environment.
 Imports do not read `.env` files, contact a model, or expose keys.
@@ -150,4 +150,4 @@ calls; the fixture includes one sanitized recorded missing-option response.
 - Default: omitted options return 0.0, with complete normalized probability maps.
 - Optional strict mode: `missing_policy="error"`.
 - Credentials and API costs belong to the consumer; no automatic retries or budget cap.
-- Status: local package, not published; no action needed from Boss to use local source.
+- Distribution: GitHub release wheel and pinned source; not PyPI.

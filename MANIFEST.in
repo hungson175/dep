@@ -1,0 +1,2 @@
+include LICENSE README.md pyproject.toml docs/dep_deepseek.md
+prune tests

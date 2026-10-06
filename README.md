@@ -9,6 +9,35 @@ there is nothing to parse and nothing to repair.
 
 ![screenshot](docs/screenshot.png)
 
+## DeepSeek: install and use in minutes
+
+No GPU, llama.cpp, web server, or runtime dependencies. Requires Python 3.10+.
+
+```bash
+python -m pip install https://github.com/hungson175/dep/releases/download/dep-deepseek-v0.1.0/dep_deepseek-0.1.0-py3-none-any.whl
+```
+
+Set your own `DEEPSEEK_API_KEY` securely in your environment, then:
+
+```python
+from dep_deepseek import DeepSeek
+
+dep = DeepSeek()
+answer = dep.choice("Please cancel my order.", "Customer intent?",
+                    ["cancel", "track", "other"])
+print(answer["choice"])
+print(answer["probabilities"])
+```
+
+Also supports `dep.noul(...)`, `dep.score(...)`, and `dep.predict(...)` for typed
+batches. Missing options return 0.0, with a complete normalized map. This is an
+approximation of an incomplete probability window, not a calibrated guarantee.
+The adapter makes paid requests using **your** key; no automatic retries or
+built-in spending cap. It never reads `.env` files. Hosted inference adapter,
+not a fine-tuned model. [Full API and examples](docs/dep_deepseek.md) ·
+[GitHub release](https://github.com/hungson175/dep/releases/tag/dep-deepseek-v0.1.0).
+Distributed on GitHub, **not PyPI**.
+
 ## The idea
 
 When a model is about to emit the first token after `Answer:`, it has already read your
