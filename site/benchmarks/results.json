@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-06",
+  "planned": 231,
+  "scope": "legacy_authored_public_not_official_rank",
+  "upstream_pin": "bb05a335bc809e61b20c0f745d25499a82b326fc",
+  "dataset_hash": "dc3995d8ae1e2fc8e81ce38431add509eb8bb39b85aadfd0c7c32079382dde51",
+  "models": [
+    {
+      "name": "Bonsai-Dep",
+      "planned": 231,
+      "correct": 187,
+      "valid": 231,
+      "accuracy": 0.8095238095238095,
+      "evidence": "fresh_serial_local_run",
+      "per_type": {
+        "choice": {
+          "count": 139,
+          "correct": 117
+        },
+        "noul": {
+          "count": 74,
+          "correct": 56
+        },
+        "score": {
+          "count": 18,
+          "correct": 14
+        }
+      },
+      "p50_s": 0.3996486789546907,
+      "p95_s": 2.209613333689049,
+      "brier": 0.2479369177889038,
+      "ece": 0.032853729811228284,
+      "calibration_n": 231,
+      "inference_cost_usd_per_1000": null,
+      "cost_basis": "hardware_and_electricity_unmeasured"
+    },
+    {
+      "name": "DeepSeek-Dep",
+      "planned": 231,
+      "correct": 190,
+      "valid": 231,
+      "accuracy": 0.8225108225108225,
+      "evidence": "offline_replay_of_saved_API_responses",
+      "per_type": {
+        "choice": {
+          "count": 139,
+          "correct": 119
+        },
+        "noul": {
+          "count": 74,
+          "correct": 57
+        },
+        "score": {
+          "count": 18,
+          "correct": 14
+        }
+      },
+      "p50_s": 0.6831156662665308,
+      "p95_s": 0.9124643160030246,
+      "brier": 0.2729391973771225,
+      "ece": 0.11102609761904045,
+      "calibration_n": 231,
+      "inference_cost_usd_per_1000": 0.17793766233766237,
+      "cost_basis": "original_API_peak_tariff_upper_bound"
+    }
+  ],
+  "deepseek_original_strict": {
+    "correct": 178,
+    "valid": 218,
+    "accuracy": 0.7705627705627706,
+    "missing_candidate_failures": 13
+  },
+  "paired": {
+    "bonsai_only_correct": 8,
+    "deepseek_only_correct": 11
+  },
+  "evidence_records_sha256": {
+    "bonsai": "0d33527e58544fa9b5aaa6a5583d270765a0bfe6186e15e5431e4d7d93491c19",
+    "deepseek_original": "c3fdc37233827ec55bdaf69acd0c4e33344092d5bd132363acd22c9ef8c6f3be",
+    "deepseek_zero_fill": "f075d24c7a0a1e620b95ec1a67cef9553965db720e6c4b1da645f1ff85c4c5db"
+  },
+  "official_score": null,
+  "official_rank": null,
+  "notes": [
+    "DeepSeek zero-fill is post-hoc decoding, not fresh inference; latency and cost come from the original API run.",
+    "Bonsai GPU was shared. Hardware/electricity not measured. No throughput claim.",
+    "Same exact public task IDs; failed decisions remain denominator. No tuning on gold labels.",
+    "ECE uses top-label probability, not the playground margin confidence. Diagnostics are not fitted calibration."
+  ]
+}

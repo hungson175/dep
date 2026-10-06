@@ -43,7 +43,8 @@ class ModelUiE2E(unittest.TestCase):
             page.on('pageerror', lambda e: errors.append(str(e)))
             page.on('request', lambda r: sent.append(json.loads(r.post_data))
                     if r.url.endswith('/api/decide') and r.method == 'POST' else None)
-            page.goto(os.environ['DEP_E2E_URL'], wait_until='networkidle')
+            # The playground polls /api/stats; networkidle is not a readiness gate.
+            page.goto(os.environ['DEP_E2E_URL'], wait_until='domcontentloaded')
             selector = page.get_by_label('Model', exact=True)
             expect(selector).to_have_value('bonsai')
             page.get_by_role('button', name='Run', exact=True).click()
