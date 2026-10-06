@@ -89,9 +89,17 @@ class NativeRunnerTests(unittest.TestCase):
                         {'probs': {k: 2. for k in self.tasks[0].labels}},
                         {'prefill_ms': -1}, {'prefill_ms': math.inf},
                         {'decision_ms': 999}, {'local_total_ms': 1},
+                        {'local_wall_ms': -1}, {'local_wall_ms': 1},
                         {'prompt_tokens': 0}, {'prompt_tokens': True}]:
             with self.subTest(changes=changes), self.assertRaises(ValueError):
                 aggregate(self.tasks, [metadata, result(self.tasks[0], **changes)])
+
+    def test_wall_time_is_measured_separately_from_component_sum(self):
+        summary, records = aggregate(self.tasks[:1], [
+            {'type': 'metadata', 'model_load_ms': 9000},
+            result(self.tasks[0], local_wall_ms=17.)])
+        self.assertEqual(records[0]['latency_s'], .017)
+        self.assertEqual(summary['native_components']['local_total']['p50_s'], .016)
 
     def fake_process(self, command, **kwargs):
         self.assertEqual(command[0], str(self.root / 'native'))

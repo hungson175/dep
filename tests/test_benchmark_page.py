@@ -21,7 +21,7 @@ class BenchmarkPageTests(unittest.TestCase):
         self.assertEqual(data['scope'], 'legacy_authored_public_not_official_rank')
         self.assertEqual(data['upstream_pin'], 'bb05a335bc809e61b20c0f745d25499a82b326fc')
         self.assertEqual({m['name']: m['correct'] for m in data['models']},
-                         {'Bonsai-Dep': 187, 'DeepSeek-Dep': 190})
+                         {'Bonsai-Dep': 188, 'DeepSeek-Dep': 190})
         for model in data['models']:
             self.assertEqual(model['valid'], 231)
             self.assertAlmostEqual(model['accuracy'], model['correct'] / 231)
@@ -35,6 +35,27 @@ class BenchmarkPageTests(unittest.TestCase):
         self.assertIn('not an official', html)
         self.assertIn('hardware', html)
         self.assertIn('82.25%', html); self.assertIn('80.95%', html)
+        self.assertIn('81.39%', html)
+
+    def test_bonsai_latency_is_native_and_not_mixed_with_api_roundtrip(self):
+        data = json.loads((ROOT / 'results.json').read_text())
+        html = (ROOT / 'index.html').read_text()
+        bonsai, deepseek = data['models']
+        self.assertEqual(bonsai['latency_basis'], 'native_inprocess_decision_wall')
+        self.assertEqual(deepseek['latency_basis'], 'provider_http_round_trip')
+        self.assertEqual(bonsai['native_components']['decision']['n'], 231)
+        self.assertEqual(bonsai['p50_s'], bonsai['native_components']['local_wall']['p50_s'])
+        self.assertEqual(bonsai['p95_s'], bonsai['native_components']['local_wall']['p95_s'])
+        self.assertEqual(data['bonsai_original_http']['correct'], 187)
+        alignment = data['official_protocol_alignment']
+        self.assertEqual(alignment['version'], 'v1.6.1')
+        self.assertEqual(alignment['status'], 'not_matched_missing_public_dataset_and_scorer')
+        self.assertIsNone(data['official_score'])
+        self.assertIn('O1S', html)
+        self.assertIn('Native local decision', html)
+        self.assertIn('Provider API round-trip', html)
+        self.assertIn('not directly comparable', html)
+        self.assertNotIn('<tr><td>HTTP round-trip p50</td>', html)
 
     def test_only_public_release_files_and_valid_links(self):
         self.assertTrue((ROOT / '.nojekyll').is_file())
@@ -44,7 +65,8 @@ class BenchmarkPageTests(unittest.TestCase):
                 self.assertTrue((ROOT / link.split('#')[0]).is_file(), link)
         files = {p.relative_to(ROOT).as_posix() for p in ROOT.rglob('*') if p.is_file()}
         self.assertEqual(files, {'index.html', 'results.json', '.nojekyll',
-            'reports/bonsai_dep_public_20261006.md', 'reports/deepseek_flash_public_20261006.md',
+            'reports/bonsai_dep_public_20261006.md', 'reports/bonsai_dep_native_public_20261006.md',
+            'reports/deepseek_flash_public_20261006.md',
             'reports/deepseek_flash_zero_fill_replay_20261006.md'})
 
     @unittest.skipUnless(os.environ.get('DEP_BENCHMARK_PAGE_URL'), 'Explicit static-page browser check')
@@ -56,15 +78,16 @@ class BenchmarkPageTests(unittest.TestCase):
             page = browser.new_page()
             page.goto(base + '/', wait_until='domcontentloaded')
             expect(page).to_have_title('Dep benchmark — Bonsai & DeepSeek')
-            expect(page.get_by_text('80.95%', exact=True)).to_be_visible()
+            expect(page.get_by_text('81.39%', exact=True)).to_be_visible()
             expect(page.get_by_text('82.25%', exact=True)).to_be_visible()
             for width in [390, 1280]:
                 page.set_viewport_size({'width': width, 'height': 900})
                 self.assertTrue(page.evaluate('document.documentElement.scrollWidth <= innerWidth'))
             response = page.request.get(base + '/results.json')
             self.assertEqual(response.status, 200)
-            self.assertEqual(response.json()['models'][0]['correct'], 187)
+            self.assertEqual(response.json()['models'][0]['correct'], 188)
             self.assertEqual(page.request.get(base + '/reports/bonsai_dep_public_20261006.md').status, 200)
+            self.assertEqual(page.request.get(base + '/reports/bonsai_dep_native_public_20261006.md').status, 200)
             browser.close()
 
 

@@ -175,10 +175,17 @@ the library itself does not use the benchmark cache.
 [Benchmark page](https://hungson175.github.io/dep/) ·
 [Bonsai public report on GitHub](https://github.com/hungson175/dep/blob/gh-pages/reports/bonsai_dep_public_20261006.md)
 
-**Bonsai-Dep: 187/231 (80.95%)**, all 231 distributions valid, p50 400 ms,
-p95 2210 ms on a shared RTX 3090 Ti. DeepSeek-Dep's zero-fill offline replay
+**Bonsai-Dep native: 188/231 (81.39%)**, all 231 distributions valid,
+native in-process wall time p50 140 ms, p95 1724 ms on RTX 3090 Ti.
+The [native report](docs/benchmarks/bonsai_dep_native_public_20261006.md)
+separates tokenization/reset/prefill/sampling and excludes load/warmups/HTTP.
+The earlier 187/231 result and 400/2210 ms **HTTP round-trip** remain archived;
+they are not native inference timings. DeepSeek-Dep's zero-fill offline replay
 scores 190/231 (82.25%); this is not a fresh second API run.
-These are public-only diagnostics, **not official scores or rankings**.
+These are legacy public-only diagnostics, **not official scores or rankings**.
+The current v1.6.1 P300 dataset and exact O1S scorer have not been obtained or
+verified here, so these results do **not** match the current scoring protocol.
+Native Bonsai and provider-API DeepSeek timings are not directly comparable.
 
 The report-only `gh-pages` branch contains the HTML page, aggregate `results.json`,
 and detailed reports, not keys, raw run logs or the application checkout.
