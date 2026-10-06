@@ -107,10 +107,21 @@ time went: `queued` / `served` / `routing`.
 ## DeepSeek notebook and public benchmark
 
 `learn/deepseek-flash.ipynb` now shares its implementation with
-`deepseek_flash.py`. **Run All is offline by default**; imports do not load
+`deepseek_flash.py`. A reusable [Python library](docs/dep_deepseek.md) is available:
+
+```python
+from dep_deepseek import DeepSeek
+dep = DeepSeek()  # DEEPSEEK_API_KEY from the launching environment.
+answer = dep.choice("Cancel my order.", "Intent?", ["cancel", "track", "other"])
+print(answer["choice"], answer["probabilities"])
+```
+
+**Run All is offline by default**; imports do not load
 `.env` or contact any model. The recipe is unchanged: `deepseek-flash`, thinking
-disabled, one output token, temperature 1, and top-20 logprobs. Missing candidates
-fail closed. The probabilities are conditional on the supplied candidates;
+disabled, one output token, temperature 1, and top-20 logprobs. Missing options
+now return 0.0 by default, an approximation for unreported probability—not a
+measured zero. `missing_policy="error"` retains the original strict behavior;
+all-missing or malformed reports still raise errors. Probabilities are conditional;
 renormalization does not establish empirical calibration or injection safety.
 
 The benchmark downloads the MIT-licensed authored public cases from a pinned
@@ -123,6 +134,8 @@ python3 -m benchmarks.jevbench_flash dry-run
 python3 -m unittest discover -s tests -v  # mocked APIs; no inference
 # Launch with DEEPSEEK_API_KEY already exported; never paste it into a notebook.
 python3 -m benchmarks.jevbench_flash run --cap-usd 20
+# Reproduce the original strict missing-option policy:
+# python3 -m benchmarks.jevbench_flash run --cap-usd 20 --missing-policy error
 ```
 
 These are **231 legacy public authored cases**, not the private/current v1.6
@@ -143,9 +156,15 @@ requires a new output folder and still uses the same budget ledger.
 
 Nothing here changes `app.py`, `minijev.py`, the live playground, or services.
 
-Recorded run: [DeepSeek Flash public JevBench, 2026-10-06](docs/benchmarks/deepseek_flash_public_20261006.md)
+Recorded **strict-policy** run: [DeepSeek Flash public JevBench, 2026-10-06](docs/benchmarks/deepseek_flash_public_20261006.md)
 — 178/231 correct (77.06%), p50 683 ms, cost upper bound $0.0411 total.
 This is a public-only diagnostic, not a current official leaderboard score.
+
+[Zero-fill offline replay](docs/benchmarks/deepseek_flash_zero_fill_replay_20261006.md)
+— 190/231 correct (82.25%); all 13 missing-option cases produce valid maps.
+This reuses the same saved responses with the new policy, not fresh inference.
+Development tests need the pinned public cache from the `fetch` step above;
+the library itself does not use the benchmark cache.
 
 ## Credit
 

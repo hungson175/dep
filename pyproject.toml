@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dep-deepseek"
+version = "0.1.0"
+description = "Simple typed decisions over DeepSeek Flash"
+readme = "docs/dep_deepseek.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = []
+
+[project.urls]
+Source = "https://github.com/hungson175/dep"
+
+[tool.setuptools]
+packages = ["dep_deepseek"]
+py-modules = ["deepseek_flash"]
+include-package-data = false

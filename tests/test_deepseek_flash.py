@@ -100,7 +100,7 @@ class DistributionTests(unittest.TestCase):
         self.assertEqual(mass, 0.0)
 
     def test_invalid_fail_closed(self):
-        bad_reports = [[], [{'token': '1', 'logprob': -.1}],
+        bad_reports = [[],
             [{'token': '1', 'logprob': 1}, {'token': '2', 'logprob': -.2}],
             [{'token': '1', 'logprob': float('nan')}, {'token': '2', 'logprob': -.2}],
             [{'token': '1', 'logprob': -9999}, {'token': '2', 'logprob': -.2}],
@@ -114,6 +114,22 @@ class DistributionTests(unittest.TestCase):
             candidate_probs([], {'a': 'Yes', 'b': ' yes'})
         with self.assertRaises(DistributionError): candidate_probs([], {})
         self.assertEqual(confidence({'one': 1.0}), 1.0)
+
+    def test_missing_candidates_default_zero_and_opt_in_strict(self):
+        report = [{'token': '1', 'logprob': math.log(.7)},
+                  {'token': '3', 'logprob': math.log(.2)},
+                  {'token': 'Other', 'logprob': math.log(.1)}]
+        labels = {'a': '1', 'b': '2', 'c': '3'}
+        p, mass = candidate_probs(report, labels)
+        self.assertEqual(set(p), set(labels))
+        self.assertEqual(p['b'], 0.0)
+        self.assertAlmostEqual(p['a'], 7 / 9)
+        self.assertAlmostEqual(p['c'], 2 / 9)
+        self.assertAlmostEqual(mass, .9)
+        with self.assertRaises(DistributionError): candidate_probs(report, labels, missing_policy='error')
+        with self.assertRaises(ValueError): candidate_probs(report, labels, missing_policy='invalid')
+        with self.assertRaises(DistributionError):
+            candidate_probs([{'token': 'Other', 'logprob': -1}], labels)
 
 
 class ClientTests(unittest.TestCase):
@@ -165,7 +181,7 @@ class ClientTests(unittest.TestCase):
 
 class AdapterTests(unittest.TestCase):
     def setUp(self):
-        self.client = DeepSeekFlashClient('TEST_ONLY')
+        self.client = DeepSeekFlashClient('TEST_ONLY', missing_policy='error')
         self.adapter = JevBenchAdapter(self.client)
 
     def test_no_answer_leak_and_canonical_keys(self):

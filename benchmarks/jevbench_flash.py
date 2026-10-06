@@ -125,6 +125,9 @@ def run_public(tasks, adapter, ledger, output):
     output.mkdir(parents=True, exist_ok=False, mode=0o700)
     raw_dir = output / "raw"
     raw_dir.mkdir(mode=0o700)
+    policy = getattr(adapter, "missing_policy", None)
+    if policy not in ("zero", "error"):
+        policy = "unknown"
     write_json(output / "manifest.json", {
         "scope": SCOPE, "upstream_pin": PIN, "dataset_hash": dataset_hash(tasks),
         "planned": len(tasks), "recipe": "learn/deepseek-flash.ipynb",
@@ -133,7 +136,8 @@ def run_public(tasks, adapter, ledger, output):
             for name in ["deepseek_flash.py", "benchmarks/jevbench_flash.py", "learn/deepseek-flash.ipynb"]
         },
         "settings": {"max_tokens": 1, "temperature": 1.0, "thinking": {"type": "disabled"},
-                     "logprobs": True, "top_logprobs": 20, "logit_bias": "omitted"},
+                     "logprobs": True, "top_logprobs": 20, "logit_bias": "omitted",
+                     "missing_policy": policy},
         "tariff_upper_bound_usd_per_million": {"input_miss": PRICE_INPUT,
                                               "input_hit": PRICE_HIT, "output": PRICE_OUTPUT},
         "pricing_source": "https://api-docs.deepseek.com/quick_start/pricing/",
@@ -163,6 +167,7 @@ def run_public(tasks, adapter, ledger, output):
                 "error": result.error, "error_kind": result.error_kind,
                 "status_code": result.status, "latency_s": result.latency_s,
                 "usage": result.usage, "candidate_mass": result.candidate_mass,
+                "missing_options": result.missing_options, "missing_policy": result.missing_policy,
                 "cost_usd": cost, "cost_basis": "peak_tariff_upper_bound" if cost is not None else "unknown",
             }
             stream.write(json.dumps(record, allow_nan=False) + "\n")
@@ -177,6 +182,7 @@ def run_public(tasks, adapter, ledger, output):
                 break
     summary = summarize(tasks, rows, ledger_charged=ledger.charged)
     summary.update(scope=SCOPE, upstream_pin=PIN, stop_reason=stop_reason,
+                   missing_policy=policy, zero_filled_decisions=sum(bool(r["missing_options"]) for r in rows),
                    official_score=None, official_rank=None,
                    calibration_note="Conditional logprobs, not fitted/validated calibration.",
                    price_note="Peak-tariff upper bound, not a measured provider bill.")
@@ -200,6 +206,8 @@ def main(argv=None):
     ap.add_argument("--output", type=Path)
     ap.add_argument("--cap-usd", type=float, default=20)
     ap.add_argument("--limit", type=int)
+    ap.add_argument("--missing-policy", choices=["zero", "error"], default="zero",
+                    help="zero-fill unreported options (default), or retain the original strict recipe")
     args = ap.parse_args(argv)
     if args.action == "fetch":
         fetch_source(args.source)
@@ -213,13 +221,13 @@ def main(argv=None):
         tasks = tasks[:args.limit]
     if args.action == "dry-run":
         # Prepare without a real key or any inference, including all canonical mappings.
-        adapter = JevBenchAdapter(DeepSeekFlashClient("DRY_RUN_NO_KEY"))
+        adapter = JevBenchAdapter(DeepSeekFlashClient("DRY_RUN_NO_KEY", missing_policy=args.missing_policy))
         for t in tasks:
             adapter.prepare(t)
         print(json.dumps({"scope": SCOPE, "planned": len(tasks), "upstream_pin": PIN,
-                          "cap_usd": args.cap_usd, "calls_sent": 0}))
+                          "cap_usd": args.cap_usd, "missing_policy": args.missing_policy, "calls_sent": 0}))
         return 0
-    client = DeepSeekFlashClient.from_env()
+    client = DeepSeekFlashClient.from_env(missing_policy=args.missing_policy)
     from jevbench.budget import Ledger
     output = args.output or ROOT / "benchmark_runs" / time.strftime("%Y%m%dT%H%M%S")
     # Shared across runs: a lost process or new output folder cannot reset spend.

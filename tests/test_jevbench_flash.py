@@ -94,6 +94,7 @@ class CliTests(unittest.TestCase):
         from benchmarks.jevbench_flash import main
         with patch('urllib.request.urlopen', side_effect=AssertionError('unexpected network')):
             self.assertEqual(main(['dry-run', '--limit', '2']), 0)
+            self.assertEqual(main(['dry-run', '--limit', '2', '--missing-policy', 'error']), 0)
         with self.assertRaises(SystemExit): main(['dry-run', '--limit', '0'])
         with patch('benchmarks.jevbench_flash.fetch_source') as fetch:
             self.assertEqual(main(['fetch']), 0)
@@ -138,6 +139,7 @@ class RunTests(unittest.TestCase):
         from jevbench.budget import Ledger
         tasks = [self.task(), self.task(2)]
         adapter = unittest.mock.Mock()
+        adapter.missing_policy = 'zero'
         adapter.run.side_effect = [
             BenchmarkResult(ok=True, probs={'a': .8, 'b': .2}, latency_s=.1,
                             usage={'input_tokens': 100, 'output_tokens': 1}),
@@ -152,6 +154,8 @@ class RunTests(unittest.TestCase):
         self.assertEqual(summary['accuracy'], .5)
         self.assertEqual(summary['scope'], 'public_authored_legacy_not_official_v1.6')
         self.assertTrue(summary['complete'])
+        manifest = json.loads((out / 'manifest.json').read_text())
+        self.assertEqual(manifest['settings']['missing_policy'], 'zero')
         self.assertEqual(len((out / 'records.jsonl').read_text().splitlines()), 2)
         self.assertAlmostEqual(ledger.charged, 2 * (100 * .3 + 1.2) / 1e6)
         with self.assertRaises(FileExistsError): run_public(tasks, adapter, ledger, out)
@@ -164,6 +168,27 @@ class RunTests(unittest.TestCase):
         adapter.run.assert_not_called()
         self.assertFalse(summary['complete'])
         self.assertEqual(summary['stop_reason'], 'budget')
+
+    def test_zero_fill_http_to_record_seam(self):
+        from deepseek_flash import DeepSeekFlashClient, JevBenchAdapter
+        from jevbench.budget import Ledger
+        response = {'model': 'deepseek-flash',
+                    'usage': {'prompt_tokens': 20, 'completion_tokens': 1},
+                    'choices': [{'logprobs': {'content': [
+                        {'top_logprobs': [{'token': '1', 'logprob': 0.0}]}]}}]}
+        adapter = JevBenchAdapter(DeepSeekFlashClient('TEST_ONLY'))
+        out = self.root / 'zero_fill'
+        with patch('urllib.request.urlopen', return_value=io.BytesIO(json.dumps(response).encode())) as http:
+            summary = run_public([self.task()], adapter,
+                                 Ledger(self.root / 'ledger.jsonl', 20), out)
+        self.assertEqual(http.call_count, 1)
+        self.assertEqual(summary['zero_filled_decisions'], 1)
+        self.assertEqual(summary['missing_policy'], 'zero')
+        self.assertEqual(summary['accuracy'], 1.0)
+        row = json.loads((out / 'records.jsonl').read_text())
+        self.assertEqual(row['probs'], {'a': 1.0, 'b': 0.0})
+        self.assertEqual(row['missing_options'], ['b'])
+        self.assertEqual(row['missing_policy'], 'zero')
 
     def test_access_and_transport_stops(self):
         from jevbench.budget import Ledger

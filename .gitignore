@@ -36,3 +36,8 @@ venv/
 benchmark_runs/
 .coverage
 htmlcov/
+
+# Local distributable artifacts and packaging/build noise.
+dist/
+build/
+*.egg-info/

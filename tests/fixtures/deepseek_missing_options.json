@@ -1,0 +1,244 @@
+{
+  "provenance": {
+    "task_id": "easy-intent-09",
+    "upstream_pin": "bb05a335bc809e61b20c0f745d25499a82b326fc",
+    "dataset_source": "https://github.com/fstandhartinger/jevbench",
+    "dataset_license": "MIT",
+    "note": "Sanitized real response from 2026-10-06 public run; no credentials or request headers."
+  },
+  "options": {
+    "play_music": "Play a song, album, artist or playlist",
+    "send_message": "Send a text message to someone",
+    "set_alarm": "Set an alarm or wake-up time",
+    "turn_off_lights": "Switch lights off",
+    "weather": "Ask about the weather or forecast"
+  },
+  "missing_options": [
+    "turn_off_lights"
+  ],
+  "response": {
+    "model": "deepseek-flash",
+    "usage": {
+      "prompt_tokens": 115,
+      "completion_tokens": 1,
+      "total_tokens": 116,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 115
+    },
+    "choices": [
+      {
+        "logprobs": {
+          "content": [
+            {
+              "token": "2",
+              "logprob": -4.005352e-05,
+              "bytes": [
+                50
+              ],
+              "top_logprobs": [
+                {
+                  "token": "2",
+                  "logprob": -4.005352e-05,
+                  "bytes": [
+                    50
+                  ]
+                },
+                {
+                  "token": "The",
+                  "logprob": -10.959785,
+                  "bytes": [
+                    84,
+                    104,
+                    101
+                  ]
+                },
+                {
+                  "token": "5",
+                  "logprob": -12.675779,
+                  "bytes": [
+                    53
+                  ]
+                },
+                {
+                  "token": "send",
+                  "logprob": -13.415241,
+                  "bytes": [
+                    115,
+                    101,
+                    110,
+                    100
+                  ]
+                },
+                {
+                  "token": "3",
+                  "logprob": -13.4766445,
+                  "bytes": [
+                    51
+                  ]
+                },
+                {
+                  "token": "1",
+                  "logprob": -13.676916,
+                  "bytes": [
+                    49
+                  ]
+                },
+                {
+                  "token": "I",
+                  "logprob": -13.913384,
+                  "bytes": [
+                    73
+                  ]
+                },
+                {
+                  "token": "Here",
+                  "logprob": -14.185893,
+                  "bytes": [
+                    72,
+                    101,
+                    114,
+                    101
+                  ]
+                },
+                {
+                  "token": "Let",
+                  "logprob": -14.45045,
+                  "bytes": [
+                    76,
+                    101,
+                    116
+                  ]
+                },
+                {
+                  "token": "**",
+                  "logprob": -14.572076,
+                  "bytes": [
+                    42,
+                    42
+                  ]
+                },
+                {
+                  "token": "For",
+                  "logprob": -14.7242155,
+                  "bytes": [
+                    70,
+                    111,
+                    114
+                  ]
+                },
+                {
+                  "token": ")",
+                  "logprob": -14.7985735,
+                  "bytes": [
+                    41
+                  ]
+                },
+                {
+                  "token": "Text",
+                  "logprob": -14.827208,
+                  "bytes": [
+                    84,
+                    101,
+                    120,
+                    116
+                  ]
+                },
+                {
+                  "token": "This",
+                  "logprob": -14.854218,
+                  "bytes": [
+                    84,
+                    104,
+                    105,
+                    115
+                  ]
+                },
+                {
+                  "token": "A",
+                  "logprob": -14.87482,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": "If",
+                  "logprob": -14.937994,
+                  "bytes": [
+                    73,
+                    102
+                  ]
+                },
+                {
+                  "token": "Yes",
+                  "logprob": -15.015049,
+                  "bytes": [
+                    89,
+                    101,
+                    115
+                  ]
+                },
+                {
+                  "token": ".",
+                  "logprob": -15.0225115,
+                  "bytes": [
+                    46
+                  ]
+                },
+                {
+                  "token": "<｜｜end▁of▁sentence｜｜>",
+                  "logprob": -15.08163,
+                  "bytes": [
+                    60,
+                    239,
+                    189,
+                    156,
+                    239,
+                    189,
+                    156,
+                    101,
+                    110,
+                    100,
+                    226,
+                    150,
+                    129,
+                    111,
+                    102,
+                    226,
+                    150,
+                    129,
+                    115,
+                    101,
+                    110,
+                    116,
+                    101,
+                    110,
+                    99,
+                    101,
+                    239,
+                    189,
+                    156,
+                    239,
+                    189,
+                    156,
+                    62
+                  ]
+                },
+                {
+                  "token": "It",
+                  "logprob": -15.090897,
+                  "bytes": [
+                    73,
+                    116
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
