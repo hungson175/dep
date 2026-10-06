@@ -30,3 +30,9 @@ venv/
 .DS_Store
 .idea/
 .vscode/
+
+# Reproducible public benchmark cache and private per-request run evidence.
+.benchmark_cache/
+benchmark_runs/
+.coverage
+htmlcov/

@@ -104,6 +104,45 @@ time went: `queued` / `served` / `routing`.
 - `app.py` — FastAPI: queue, timing, validation, rate limit.
 - `static/index.html` — the playground.
 
+## DeepSeek notebook and public benchmark
+
+`learn/deepseek-flash.ipynb` now shares its implementation with
+`deepseek_flash.py`. **Run All is offline by default**; imports do not load
+`.env` or contact any model. The recipe is unchanged: `deepseek-flash`, thinking
+disabled, one output token, temperature 1, and top-20 logprobs. Missing candidates
+fail closed. The probabilities are conditional on the supplied candidates;
+renormalization does not establish empirical calibration or injection safety.
+
+The benchmark downloads the MIT-licensed authored public cases from a pinned
+[JevBench revision](https://github.com/fstandhartinger/jevbench/tree/bb05a335bc809e61b20c0f745d25499a82b326fc),
+verifying Git blob hashes and retaining the upstream license:
+
+```bash
+python3 -m benchmarks.jevbench_flash fetch
+python3 -m benchmarks.jevbench_flash dry-run
+python3 -m unittest discover -s tests -v  # mocked APIs; no inference
+# Launch with DEEPSEEK_API_KEY already exported; never paste it into a notebook.
+python3 -m benchmarks.jevbench_flash run --cap-usd 20
+```
+
+These are **231 legacy public authored cases**, not the private/current v1.6
+leaderboard pool. Results are diagnostic only: accuracy, ECE/Brier, ordinal MAE,
+and API round-trip p50/p95, not an official Capability/Composite score or rank.
+The adapter maps notebook true/false to JevBench yes/no and its 1-based score
+keys to JevBench's 0-based indices, without changing the model prompt or reading
+gold answers into it.
+
+Run evidence stays in git-ignored `benchmark_runs/`. Its shared durable ledger
+caps all launches at $20, reserves the full 1M-token-context cost before each
+call, and retains reservations when billing is unknown or a process is lost.
+Peak [DeepSeek tariffs](https://api-docs.deepseek.com/quick_start/pricing/)
+checked on 2026-10-06 are used as cost upper bounds, not a measured invoice.
+Failed candidate parsing still counts billed usage; no automatic retries,
+resume, option shuffling, truncation, or text fallback are performed. A rerun
+requires a new output folder and still uses the same budget ledger.
+
+Nothing here changes `app.py`, `minijev.py`, the live playground, or services.
+
 ## Credit
 
 The one-token approach is how [TypeSafe's Jev](https://typesafe.ai) and
