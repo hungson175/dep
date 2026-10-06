@@ -59,9 +59,15 @@ class CacheTests(unittest.TestCase):
             self.assertEqual(http.call_count, 1 + len(FILES))
             before = list(sys.path)
             try:
-                activate_source(source)
-                (source / FILES[0]).write_text('tampered')
-                with self.assertRaisesRegex(ValueError, 'source changed'): activate_source(source)
+                # Other adapter tests may already import the canonical cache.
+                # Isolate this test of a different, temporary cache copy.
+                with patch.dict(sys.modules):
+                    for name in list(sys.modules):
+                        if name == 'jevbench' or name.startswith('jevbench.'):
+                            sys.modules.pop(name)
+                    activate_source(source)
+                    (source / FILES[0]).write_text('tampered')
+                    with self.assertRaisesRegex(ValueError, 'source changed'): activate_source(source)
             finally:
                 sys.path[:] = before
 

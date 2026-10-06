@@ -34,6 +34,7 @@ class SiteBudgetTests(unittest.TestCase):
             ids = list(pool.map(reserve, range(8)))
         self.assertEqual(sum(i is not None for i in ids), 2)
         self.assertAlmostEqual(self.budget.snapshot()['charged_usd'], .6)
+        with self.assertRaises(BudgetUnavailable): SiteBudget(self.path, .1).snapshot()
 
     def test_bad_inputs_and_corrupt_evidence_fail_closed(self):
         for cap in [0, 21, float('nan'), True]:

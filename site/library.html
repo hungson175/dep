@@ -91,12 +91,12 @@ print(result["usage"])</code></pre>
 </section>
 <section id="limits"><h2>Know what you’re running.</h2>
 <p>This is a hosted inference adapter, <strong>not a fine-tuned model</strong>. It uses <code>deepseek-flash</code> (DeepSeek V4.1 Flash), thinking disabled, one output token, temperature 1, and top-20 logprobs. There is no logit bias or free-text parsing fallback.</p>
-<p>You use <strong>your own DeepSeek account and key</strong>; provider charges apply. This download does not enable public DeepSeek inference on the playground. The library has no automatic retries, cache, or spending cap. A later batch failure can still leave completed calls billed.</p>
+<p>Installed library calls use <strong>your own DeepSeek account and key</strong>; provider charges apply. The playground offers a separate, shared DeepSeek demo with a $20 lifetime cap; Bonsai remains its default. The library itself has no automatic retries, cache, or spending cap. A later batch failure can still leave completed calls billed.</p>
 <p>Catch <code>APIError</code> for HTTP failures, <code>TransportError</code> for network failures, and <code>DistributionError</code> for unusable reports. Invalid inputs raise <code>ValueError</code> or serialization errors.</p>
 <p>Text or JSON-serializable state is supported; choice accepts a mapping or unique label list; score accepts an ordered list. Up to 35 options are supported. Outputs do not establish correct decisions or prompt-injection resistance; do not use this as the sole high-stakes control.</p>
 </section>
 </div></div>
 </main>
-<footer><div class="wrap"><span>dep-deepseek {{VERSION}} · MIT · direct download release, not on PyPI</span><a href="/">The existing local-model playground remains unchanged ↗</a></div></footer>
+<footer><div class="wrap"><span>dep-deepseek {{VERSION}} · MIT · direct download release, not on PyPI</span><a href="/">Try the playground · Bonsai by default ↗</a></div></footer>
 </body>
 </html>

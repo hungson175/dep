@@ -96,6 +96,13 @@ a{color:var(--dim)}a:hover{color:var(--accent)}
   <h1>dep <span>— typed decisions, not text</span></h1>
   <div class="presets">
     <label class="pick">
+      <span>Model</span>
+      <select id="model" aria-label="Model" onchange="modelChanged()">
+        <option value="bonsai" selected>Bonsai — local · default</option>
+        <option value="deepseek-flash">DeepSeek V4.1 Flash — hosted</option>
+      </select>
+    </label>
+    <label class="pick">
       <span>Try</span>
       <select id="ex" onchange="load(this.value)">
         <option value="choice" selected>choice — pick one option  ·  route a support ticket</option>
@@ -111,7 +118,8 @@ a{color:var(--dim)}a:hover{color:var(--accent)}
       <button onclick="burst()">Go</button>
       <button onclick="hidePw()" title="cancel">×</button>
     </span>
-    <button onclick="curlIt()">Copy as curl</button>
+    <button onclick="curlIt(event)">Copy as curl</button>
+    <a href="/static/library.html">Python library ↗</a>
   </div>
   <div class="meter" id="meter"></div>
 </header>
@@ -134,9 +142,9 @@ a{color:var(--dim)}a:hover{color:var(--accent)}
 </main>
 
 <footer>
-  <span>Ternary Bonsai 2 27B · ~1.72 bits/weight · one RTX 3090 Ti</span>
+  <span id="modelmeta">Ternary Bonsai 2 27B · ~1.72 bits/weight · one RTX 3090 Ti</span>
   <span>8 slots × 16k ctx · queue admits 8 model calls · up to 4 questions run in parallel</span>
-  <span>no tokens billed · shared, rate limited</span>
+  <span id="costmeta">no tokens billed · shared, rate limited</span>
 </footer>
 
 <script>
@@ -217,19 +225,34 @@ mixed: {
 const $ = id => document.getElementById(id);
 const req = $('req');
 
-function load(k){ req.value = JSON.stringify(P[k], null, 2); check(); }
+function load(k){ req.value = JSON.stringify({...P[k], model:$('model').value}, null, 2); check(); }
+
+function modelChanged(){
+  const deep = $('model').value === 'deepseek-flash';
+  try{const b=JSON.parse(req.value); b.model=$('model').value;
+      req.value=JSON.stringify(b,null,2);}catch(e){}
+  $('modelmeta').textContent = deep ? 'DeepSeek V4.1 Flash · thinking off · one token · top-20 logprobs' :
+    'Ternary Bonsai 2 27B · ~1.72 bits/weight · one RTX 3090 Ti';
+  $('costmeta').textContent = deep ? 'paid API · shared $20 lifetime cap · missing options return 0% · no retries' :
+    'no tokens billed · shared, rate limited';
+  $('bz').disabled=deep;
+  if(deep) hidePw();
+  check();
+}
 
 const MAXQ = 4;
 
 function check(){
   try{
     const b = JSON.parse(req.value);
+    // The visible selector is authoritative for both Run and Copy as curl.
+    b.model = $('model').value;
     const n = Object.keys(b.questions||{}).length;
     $('reqinfo').innerHTML = `<span class="ok">valid JSON</span> · `+
       `<b>${n}/${MAXQ}</b> question${n===1?'':'s'} · ${(b.state||'').length} chars of state · `+
       (n>1 ? `<span class="sv">${n} model calls in parallel</span>` : `1 model call`);
     return b;
-  }catch(e){ $('reqinfo').innerHTML = `<span class="bad">invalid JSON: ${e.message}</span>`; return null; }
+  }catch(e){ $('reqinfo').innerHTML = `<span class="bad">invalid JSON: ${esc(e.message)}</span>`; return null; }
 }
 req.addEventListener('input', check);
 req.addEventListener('keydown', e=>{
@@ -275,9 +298,9 @@ function esc(s){ return String(s==null?'':s)
 function errPanel(status, detail){
   const map = {
     429: ['Slow down a moment', ''],
-    503: ['Everyone is using it at once', 'The queue is full. Nothing is broken — just try again shortly.'],
+    503: ['This model is unavailable right now', 'For a DeepSeek budget limit, choose Bonsai instead.'],
     504: ['The server is saturated', 'Your request sat in the queue and never got a slot.'],
-    502: ['The model backend is not answering', 'The llama.cpp server behind this may be restarting.'],
+    502: ['The model backend is not answering', 'No automatic retry was made. Try another model or wait.'],
     400: ['That request is not valid', ''],
   };
   const [title, hint] = map[status] || ['Request failed', ''];
@@ -288,7 +311,8 @@ function errPanel(status, detail){
 
 async function run(){
   const b = check(); if(!b) return;
-  const mine = Object.keys(b.questions).length;
+  const mine = Object.keys(b.questions||{}).length;
+  $('model').disabled=true;
   const btn=$('run'); btn.disabled=true; btn.textContent='…';
   $('code').textContent=''; $('timing').textContent='';
   const t0=performance.now();
@@ -319,19 +343,21 @@ async function run(){
     clearInterval(tick);
     $('code').innerHTML='<span class="bad">network error</span>';
     errPanel(0, String(e));
-  }finally{ clearInterval(tick); btn.disabled=false; btn.textContent='Run'; poll(); }
+  }finally{ clearInterval(tick); btn.disabled=false; btn.textContent='Run'; $('model').disabled=false; poll(); }
 }
 
-function curlIt(){
+function curlIt(event){
   const b=check(); if(!b) return;
   const c = `curl -X POST ${location.origin}/api/decide \\\n  -H 'Content-Type: application/json' \\\n  -d '${JSON.stringify(b)}'`;
+  const e=event.target;
   navigator.clipboard.writeText(c).then(()=>{
-    const e=event.target, o=e.textContent; e.textContent='copied ✓';
+    const o=e.textContent; e.textContent='copied ✓';
     setTimeout(()=>e.textContent=o,1200);
   });
 }
 
 function askPw(){
+  if($('model').value !== 'bonsai') return;
   if(LAST && LAST.stress_enabled === false)
     return errPanel(404,'Stress testing is switched off on this instance.');
   $('pwbox').classList.add('on'); $('pw').classList.remove('bad');
@@ -340,6 +366,7 @@ function askPw(){
 function hidePw(){ $('pwbox').classList.remove('on'); $('bz').style.display=''; $('pw').value=''; }
 
 async function burst(){
+  if($('model').value !== 'bonsai') return;
   const b=check(); if(!b) return;
   const pw=$('pw').value;
   if(!pw){ $('pw').classList.add('bad'); $('pw').focus(); return; }
@@ -359,7 +386,7 @@ async function burst(){
   let j, r;
   try{
     r = await fetch('/api/stress',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({password:pw, state:b.state, questions:b.questions})});
+      body:JSON.stringify({password:pw, state:b.state, questions:b.questions, model:b.model})});
     j = await r.json();
   }catch(e){ clearInterval(tick); errPanel(0,String(e));
              btn.disabled=false; btn.textContent='Stress test'; return; }
@@ -403,7 +430,16 @@ async function poll(){
       (s.waiting ? `<span style="color:var(--amber)"> · ${s.waiting} in queue</span>` : '');
 
     const b = $('banner');
-    if(s.waiting > 0){
+    const deep = $('model').value === 'deepseek-flash';
+    const modelState = s.models && s.models['deepseek-flash'];
+    if(deep && modelState && !modelState.available){
+      b.classList.add('on');
+      $('bannertxt').textContent='DeepSeek is not configured. Bonsai remains available.';
+    } else if(deep && modelState && modelState.budget &&
+        (modelState.budget.unavailable || modelState.budget.remaining_usd < 0.3000012)){
+      b.classList.add('on');
+      $('bannertxt').textContent='DeepSeek budget is exhausted or reserved by active calls. Choose Bonsai.';
+    } else if(s.waiting > 0){
       b.classList.add('on');
       $('bannertxt').innerHTML = `Busy — all ${s.slots} slots are working and `+
         `<b>${s.waiting}</b> more ${s.waiting===1?'call is':'calls are'} waiting. `+

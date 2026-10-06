@@ -132,7 +132,8 @@ def _validate_question(name: str, q: Question):
 def _answer(state: str, name: str, q: Question, model='bonsai') -> Dict[str, Any]:
     _validate_question(name, q)
     if model == 'deepseek-flash':
-        ans, usage, cost = _deepseek.run(state, q.dict())
+        question = q.model_dump() if hasattr(q, 'model_dump') else q.dict()
+        ans, usage, cost = _deepseek.run(state, question)
         ans = dict(ans)
         if q.type == 'score':
             ans['distribution'] = ans['probabilities']
