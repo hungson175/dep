@@ -20,8 +20,10 @@ class BenchmarkPageTests(unittest.TestCase):
         self.assertEqual(data['planned'], 231)
         self.assertEqual(data['scope'], 'legacy_authored_public_not_official_rank')
         self.assertEqual(data['upstream_pin'], 'bb05a335bc809e61b20c0f745d25499a82b326fc')
-        self.assertEqual({m['name']: m['correct'] for m in data['models']},
-                         {'Bonsai-Dep': 188, 'DeepSeek-Dep': 190})
+        self.assertEqual({m['name'] for m in data['models']},
+                         {'Bonsai-Dep', 'DeepSeek-Dep', 'Original Jev'})
+        self.assertEqual(data['models'][0]['correct'], 188)
+        self.assertEqual(data['models'][1]['correct'], 190)
         for model in data['models']:
             self.assertEqual(model['valid'], 231)
             self.assertAlmostEqual(model['accuracy'], model['correct'] / 231)
@@ -40,7 +42,11 @@ class BenchmarkPageTests(unittest.TestCase):
     def test_bonsai_latency_is_native_and_not_mixed_with_api_roundtrip(self):
         data = json.loads((ROOT / 'results.json').read_text())
         html = (ROOT / 'index.html').read_text()
-        bonsai, deepseek = data['models']
+        bonsai, deepseek, jev = data['models']
+        self.assertEqual(jev['model'], 'jev-1.13.0')
+        self.assertEqual(jev['latency_basis'], 'provider_api_round_trip_wall')
+        self.assertEqual(jev['evidence'], 'fresh_original_typesafe_API_run')
+        self.assertIn('original Jev report', html)
         self.assertEqual(bonsai['latency_basis'], 'native_inprocess_decision_wall')
         self.assertEqual(deepseek['latency_basis'], 'provider_http_round_trip')
         self.assertEqual(bonsai['native_components']['decision']['n'], 231)
@@ -67,7 +73,8 @@ class BenchmarkPageTests(unittest.TestCase):
         self.assertEqual(files, {'index.html', 'results.json', '.nojekyll',
             'reports/bonsai_dep_public_20261006.md', 'reports/bonsai_dep_native_public_20261006.md',
             'reports/deepseek_flash_public_20261006.md',
-            'reports/deepseek_flash_zero_fill_replay_20261006.md'})
+            'reports/deepseek_flash_zero_fill_replay_20261006.md',
+            'reports/jev_original_public_20261006.md'})
 
     @unittest.skipUnless(os.environ.get('DEP_BENCHMARK_PAGE_URL'), 'Explicit static-page browser check')
     def test_browser_metrics_mobile_and_evidence_links(self):
@@ -77,9 +84,10 @@ class BenchmarkPageTests(unittest.TestCase):
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
             page.goto(base + '/', wait_until='domcontentloaded')
-            expect(page).to_have_title('Dep benchmark — Bonsai & DeepSeek')
+            expect(page).to_have_title('Dep benchmark — Bonsai, DeepSeek & Jev')
             expect(page.get_by_text('81.39%', exact=True)).to_be_visible()
             expect(page.get_by_text('82.25%', exact=True)).to_be_visible()
+            expect(page.get_by_text('Original Jev / jev-1.13.0', exact=True)).to_be_visible()
             for width in [390, 1280]:
                 page.set_viewport_size({'width': width, 'height': 900})
                 self.assertTrue(page.evaluate('document.documentElement.scrollWidth <= innerWidth'))

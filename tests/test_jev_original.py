@@ -12,6 +12,12 @@ class OriginalJevTests(unittest.TestCase):
    for text in ['X=y','TYPESAFE_API_KEY=','TYPESAFE_API_KEY=a\nTYPESAFE_API_KEY=b']:
     p.write_text(text)
     with self.assertRaises(ValueError):read_key(p)
+ def test_modified_upstream_source_fails_closed(self):
+  from benchmarks.jevbench_jev import adapter_class
+  with patch('benchmarks.jevbench_jev.activate_source'),patch('benchmarks.jevbench_jev.json.loads',return_value={}):
+   with self.assertRaisesRegex(ValueError,'manifest'):adapter_class()
+  with patch('benchmarks.jevbench_jev.blob_sha',return_value='changed'):
+   with self.assertRaisesRegex(ValueError,'source'):adapter_class()
  def test_original_three_type_mapping_without_gold(self):
   from benchmarks.jevbench_jev import adapter_class
   cls=adapter_class();adapter=cls(model='jev-1.13.0',key_env='MOCK_JEV_KEY')

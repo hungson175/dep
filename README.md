@@ -201,6 +201,12 @@ the library itself does not use the benchmark cache.
 
 ## Published public results
 
+[Original Jev fresh public run](docs/benchmarks/jev_original_public_20261006.md):
+**199/231 (86.15%)**, all valid; `jev-1.13.0`, unchanged upstream adapter,
+API round-trip p50 418 ms / p95 516 ms, tariff-derived cost $0.008875.
+No retries or zero-fill. This is not an official leaderboard score.
+
+
 [Benchmark page](https://hungson175.github.io/dep/) ·
 [Bonsai public report on GitHub](https://github.com/hungson175/dep/blob/gh-pages/reports/bonsai_dep_public_20261006.md)
 
