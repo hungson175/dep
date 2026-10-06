@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A small Python library for typed decisions with DeepSeek Flash. Choose an option, ask yes/no, or score a rubric, without model-specific plumbing.">
+<title>dep DeepSeek — Python library</title>
+<style>
+:root{color-scheme:dark;--bg:#0d0f13;--fg:#e6e9ef;--dim:#a2adbc;--line:#29313d;--green:#6ee7a8;--mono:ui-monospace,"SF Mono",Consolas,monospace}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 Georgia,"Times New Roman",serif}
+a{color:var(--green);text-underline-offset:4px}a:hover{color:white}a:focus-visible{outline:2px solid var(--green);outline-offset:5px}
+.wrap{width:min(1060px,calc(100% - 48px));margin:auto}header{border-bottom:1px solid var(--line)}nav{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 0;font:12px/1.5 var(--mono)}
+.brand{color:var(--fg);font-size:17px;text-decoration:none}.brand span{color:var(--dim);font-size:12px}main{padding:62px 0 48px}.eyebrow{font:11px/1.5 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--green)}
+h1{font-weight:400;font-size:clamp(40px,6.5vw,72px);line-height:1.05;letter-spacing:-.045em;margin:18px 0 24px;max-width:850px}h1 em{font-style:normal;color:var(--green)}
+.intro{max-width:680px;color:var(--dim);font-size:20px}.meta{font:11px/1.7 var(--mono);color:var(--dim);margin:28px 0 36px}.meta span{display:inline-block;margin-right:20px}
+.install{background:#141a20;border-left:3px solid var(--green);padding:22px 24px;margin:32px 0}.install p{margin:0 0 12px;font:11px/1.5 var(--mono);color:var(--green);letter-spacing:.08em}
+pre{font:13px/1.8 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere;margin:18px 0 0;background:#11161c;border:1px solid var(--line);padding:22px;color:#dce6f2}.install pre{margin:0;border:0;background:none;padding:0}
+code{font-family:var(--mono);font-size:.85em;overflow-wrap:anywhere}.downloads{display:flex;gap:24px;flex-wrap:wrap;font:12px/1.7 var(--mono);margin-bottom:42px}.grid{display:grid;grid-template-columns:190px minmax(0,1fr);gap:46px;border-top:1px solid var(--line);padding-top:38px}
+aside{font:12px/1.7 var(--mono);display:flex;flex-direction:column;gap:12px;align-self:start;position:sticky;top:24px}aside a{color:var(--dim)}section{scroll-margin-top:24px;margin-bottom:48px}h2{font-size:30px;font-weight:400;letter-spacing:-.02em;margin:0 0 16px}h3{font:14px/1.6 var(--mono);margin:26px 0 8px;color:var(--green)}p{margin:14px 0;color:var(--dim)}strong{color:var(--fg)}
+table{width:100%;border-collapse:collapse;font:12px/1.65 var(--mono);margin:22px 0}th,td{text-align:left;border-bottom:1px solid var(--line);padding:12px 10px 12px 0;vertical-align:top}th{color:var(--green);font-weight:400}td{color:var(--dim)}
+.note{border-left:2px solid #dcb468;padding:2px 0 2px 18px;color:#d9c89d;font-size:15px}.stat{font:38px/1.2 var(--mono);color:var(--green);margin:22px 0 10px}.caption{font:11px/1.6 var(--mono);color:var(--dim)}footer{border-top:1px solid var(--line);padding:24px 0 36px;font:11px/1.8 var(--mono);color:var(--dim)}footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+@media(max-width:650px){.wrap{width:calc(100% - 32px)}main{padding-top:38px}.grid{grid-template-columns:1fr;gap:30px}aside{position:static;flex-direction:row;flex-wrap:wrap;gap:12px 24px}.intro{font-size:18px}.brand span{display:none}pre{padding:16px;font-size:12px}.install{padding:18px 16px}.downloads{gap:12px 22px}table{font-size:11px}}
+</style>
+</head>
+<body>
+<header><nav class="wrap" aria-label="Main navigation"><a class="brand" href="/">dep <span>/ typed decisions</span></a><a href="/">Back to playground ↗</a></nav></header>
+<main class="wrap">
+<div class="eyebrow">Python library · DeepSeek Flash</div>
+<h1>Small decisions.<br><em>Simple API.</em></h1>
+<p class="intro">Pick an option. Ask yes or no. Score an ordered rubric.<br>The library handles the model-specific plumbing; you get typed answers and a complete probability map.</p>
+<div class="meta"><span>v{{VERSION}}</span><span>Python 3.10+</span><span>MIT license</span><span>Zero runtime dependencies</span></div>
+<div class="install"><p>01 / INSTALL DIRECTLY — NO PYPI REQUIRED</p><pre><code>python -m pip install "{{WHEEL_URL}}#sha256={{WHEEL_SHA256}}"</code></pre></div>
+<div class="downloads" aria-label="Package downloads">
+<a href="/static/packages/{{WHEEL_NAME}}" download>Download wheel ↓</a>
+<a href="/static/packages/{{SDIST_NAME}}" download>Source archive ↓</a>
+<a href="/static/packages/SHA256SUMS.txt">SHA-256 checksums</a>
+<a href="/static/packages/release.json">Release manifest</a>
+</div>
+<div class="grid">
+<aside aria-label="On this page"><a href="#quickstart">Quickstart</a><a href="#questions">Three question types</a><a href="#missing">Missing options</a><a href="#benchmark">Public benchmark</a><a href="#limits">Limits &amp; costs</a></aside>
+<div>
+<section id="quickstart"><h2>One import. One decision.</h2>
+<p>Export your own <code>DEEPSEEK_API_KEY</code> in your launching environment. Keep it out of source code. The library never reads <code>.env</code> files or contacts a model when imported.</p>
+<pre><code>from dep_deepseek import DeepSeek
+
+dep = DeepSeek()
+answer = dep.choice(
+    "Please cancel my order.",
+    "What does the customer want?",
+    {"cancel": "Cancel an order",
+     "track": "Track a shipment",
+     "other": "Anything else"},
+)
+
+print(answer["choice"])
+print(answer["probabilities"])</code></pre>
+<p>The probability map includes <strong>every option you supplied</strong>. Values sum to one. Choice ties use the first supplied option.</p>
+</section>
+<section id="questions"><h2>Three question types.</h2>
+<table><thead><tr><th>Method</th><th>What you get</th></tr></thead><tbody>
+<tr><td><code>choice</code></td><td>A supplied label and probabilities over all options.</td></tr>
+<tr><td><code>noul</code></td><td>Probability of true; a complete true/false map.</td></tr>
+<tr><td><code>score</code></td><td>Expected 1-based level; a complete level map and legend.</td></tr>
+</tbody></table>
+<pre><code>urgent = dep.noul("Help me now!", "Is this urgent?")
+mood = dep.score("I am frustrated.", "How upset?",
+                 ["calm", "annoyed", "angry"])
+
+result = dep.predict(
+    {"message": "My payment failed. Help!"},
+    {
+        "urgent": {"type": "noul", "instructions": "Is this urgent?"},
+        "route": {"type": "choice", "instructions": "Which team?",
+                  "criteria": ["payments", "sales", "other"]},
+    },
+)
+print(result["answers"])
+print(result["usage"])</code></pre>
+<p><code>predict(state, questions)</code> makes one serial request per question, validating the whole batch before sending anything. Every answer includes <code>confidence</code>: the top probability minus the runner-up.</p>
+</section>
+<section id="missing"><h2>Missing means 0% by default.</h2>
+<p>When DeepSeek omits an option from its first-token top-20 report, the library returns <strong>0.0 for that option</strong> and normalizes the available candidates. Check <code>answer["diagnostics"]["missing_options"]</code> when you need visibility into the fallback.</p>
+<p class="note">Zero-fill is an approximation for unreported probability, not proof that the model assigned exactly zero. It can inflate confidence. These probabilities are not empirically calibrated.</p>
+<p>If every candidate is absent, or the report is malformed, the library raises <code>DistributionError</code>. To reject any missing option instead:</p>
+<pre><code>strict = DeepSeek(missing_policy="error")</code></pre>
+</section>
+<section id="benchmark"><h2>Public-only evidence.</h2>
+<div class="stat">190 / 231</div><div class="caption">82.25% raw accuracy · offline zero-fill replay · 6 October 2026</div>
+<p>All 13 previously missing-option failures now produce valid maps; 12 become correct and one remains wrong. The original strict result was 178/231 (77.06%). Both use the same saved responses: <strong>no new inference</strong> was needed for the replay.</p>
+<p>These are 231 legacy authored public JevBench cases, <strong>not an official leaderboard score or rank</strong>, and not the current sealed evaluation. The adapter has not been benchmarked against Quyet in a controlled run.</p>
+</section>
+<section id="limits"><h2>Know what you’re running.</h2>
+<p>This is a hosted inference adapter, <strong>not a fine-tuned model</strong>. It uses <code>deepseek-flash</code> (DeepSeek V4.1 Flash), thinking disabled, one output token, temperature 1, and top-20 logprobs. There is no logit bias or free-text parsing fallback.</p>
+<p>You use <strong>your own DeepSeek account and key</strong>; provider charges apply. This download does not enable public DeepSeek inference on the playground. The library has no automatic retries, cache, or spending cap. A later batch failure can still leave completed calls billed.</p>
+<p>Catch <code>APIError</code> for HTTP failures, <code>TransportError</code> for network failures, and <code>DistributionError</code> for unusable reports. Invalid inputs raise <code>ValueError</code> or serialization errors.</p>
+<p>Text or JSON-serializable state is supported; choice accepts a mapping or unique label list; score accepts an ordered list. Up to 35 options are supported. Outputs do not establish correct decisions or prompt-injection resistance; do not use this as the sole high-stakes control.</p>
+</section>
+</div></div>
+</main>
+<footer><div class="wrap"><span>dep-deepseek {{VERSION}} · MIT · direct download release, not on PyPI</span><a href="/">The existing local-model playground remains unchanged ↗</a></div></footer>
+</body>
+</html>
