@@ -15,8 +15,13 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 import minijev
+from deepseek_site import DeepSeekSite, SiteBudget, BudgetUnavailable
+from deepseek_flash import DistributionError
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+_deepseek = DeepSeekSite(SiteBudget(
+    os.environ.get('DEP_DEEPSEEK_LEDGER', f'{HERE}/runtime/deepseek_site_ledger.jsonl'),
+    float(os.environ.get('DEP_DEEPSEEK_BUDGET_USD', '20'))))
 SLOTS = int(os.environ.get("DEP_SLOTS", "8"))     # must match llama-server -np
 MAX_QUESTIONS = 4
 MAX_WAITING = 24                                   # requests queued before shedding
@@ -95,6 +100,7 @@ class Question(BaseModel):
 
 
 class Req(BaseModel):
+    model: Literal['bonsai', 'deepseek-flash'] = 'bonsai'
     state: str = Field(max_length=MAX_STATE_CHARS)
     questions: Dict[str, Question]
 
@@ -106,7 +112,33 @@ def _check_option_lengths(name: str, strings) -> None:
                              f"of at most {MAX_OPTION_CHARS} characters")
 
 
-def _answer(state: str, name: str, q: Question) -> Dict[str, Any]:
+def _validate_question(name: str, q: Question):
+    if not q.instructions.strip():
+        raise ValueError(f'{name}: nonempty instructions required')
+    if q.type == 'choice':
+        if not isinstance(q.criteria, dict) or not 2 <= len(q.criteria) <= MAX_OPTIONS:
+            raise ValueError(f'{name}: choice needs a criteria object with 2-{MAX_OPTIONS} options')
+        _check_option_lengths(name, list(q.criteria) + list(q.criteria.values()))
+    elif q.type == 'score':
+        if not isinstance(q.criteria, list) or not 2 <= len(q.criteria) <= 35:
+            raise ValueError(f'{name}: score needs an ordered list of 2-35 levels')
+        _check_option_lengths(name, q.criteria)
+    elif q.criteria:
+        if not isinstance(q.criteria, dict) or not {'true', 'false'} <= set(q.criteria):
+            raise ValueError(f"{name}: noul criteria needs 'true' and 'false' keys")
+        _check_option_lengths(name, list(q.criteria.values()))
+
+
+def _answer(state: str, name: str, q: Question, model='bonsai') -> Dict[str, Any]:
+    _validate_question(name, q)
+    if model == 'deepseek-flash':
+        ans, usage, cost = _deepseek.run(state, q.dict())
+        ans = dict(ans)
+        if q.type == 'score':
+            ans['distribution'] = ans['probabilities']
+            ans['levels'] = len(q.criteria)
+        ans['_usage'], ans['_cost_usd'] = usage, cost
+        return ans
     if q.type == "noul":
         crit = q.criteria if isinstance(q.criteria, dict) and q.criteria else None
         if crit and not {"true", "false"} <= set(crit):
@@ -132,7 +164,7 @@ def _answer(state: str, name: str, q: Question) -> Dict[str, Any]:
             "confidence": conf}
 
 
-def _one_call(state: str, name: str, q: Question, t_arrive: float) -> Tuple[str, Dict, float, float]:
+def _one_call(state: str, name: str, q: Question, t_arrive: float, model='bonsai') -> Tuple[str, Dict, float, float]:
     """Runs in a pool thread. Blocks on a slot permit, then hits the model."""
     got = _slots.acquire(timeout=SLOT_TIMEOUT_S)
     if not got:
@@ -141,9 +173,10 @@ def _one_call(state: str, name: str, q: Question, t_arrive: float) -> Tuple[str,
     t_slot = time.perf_counter()
     _bump("active")
     try:
-        minijev.model_seconds_reset()
-        ans = _answer(state, name, q)
-        model_s = minijev.model_seconds()
+        model_start = time.perf_counter()
+        if model == 'bonsai': minijev.model_seconds_reset()
+        ans = _answer(state, name, q, model)
+        model_s = minijev.model_seconds() if model == 'bonsai' else time.perf_counter() - model_start
     finally:
         _bump("active", -1)
         _bump("calls")
@@ -160,6 +193,12 @@ async def decide(body: Req, request: Request) -> Dict[str, Any]:
         raise HTTPException(400, "at least one question required")
     if n > MAX_QUESTIONS:
         raise HTTPException(400, f"at most {MAX_QUESTIONS} questions per request")
+    try:
+        for name, question in body.questions.items(): _validate_question(name, question)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    if body.model == 'deepseek-flash' and not _deepseek.available:
+        raise HTTPException(503, 'DeepSeek is not configured; Bonsai remains available')
     if stats["waiting"] >= MAX_WAITING:
         _bump("rejected")
         raise HTTPException(503, f"The queue is full: {stats['waiting']} requests are "
@@ -184,8 +223,15 @@ async def decide(body: Req, request: Request) -> Dict[str, Any]:
 
     try:
         results = await asyncio.gather(*[
-            loop.run_in_executor(_pool, _one_call, body.state, name, q, t_arrive)
-            for name, q in body.questions.items()])
+            loop.run_in_executor(_pool, _one_call, body.state, name, q, t_arrive, body.model)
+            for name, q in body.questions.items()], return_exceptions=True)
+        # Wait for every admitted call before releasing the request permit.
+        for result in results:
+            if isinstance(result, BaseException): raise result
+    except BudgetUnavailable as e:
+        raise HTTPException(503, str(e))
+    except DistributionError:
+        raise HTTPException(502, 'DeepSeek returned an unusable probability report')
     except ValueError as e:
         raise HTTPException(400, str(e))
     except TimeoutError as e:
@@ -209,10 +255,12 @@ async def decide(body: Req, request: Request) -> Dict[str, Any]:
         stats["total_wait_ms"] += crit_wait
         stats["peak_wait_ms"] = max(stats["peak_wait_ms"], crit_wait)
 
-    return {
-        "model": "bonsai-2-27b (ternary, local)",
+    usages = [ans.pop('_usage', {}) for _, ans, _, _ in results]
+    costs = [ans.pop('_cost_usd', 0.0) for _, ans, _, _ in results]
+    response = {
+        "model": "bonsai-2-27b (ternary, local)" if body.model == 'bonsai' else 'deepseek-flash',
         "answers": {name: ans for name, ans, _, _ in results},
-        "cost_usd": 0.0,
+        "cost_usd": sum(costs) if all(c is not None for c in costs) else None,
         "timing_ms": {"queued": round(crit_wait, 1), "served": round(crit_model, 1),
                       "routing": round(routing, 1), "total": round(total_ms, 1)},
         "queue": {"slots": SLOTS, "model_calls": n, "ran": "parallel" if n > 1 else "single",
@@ -220,9 +268,15 @@ async def decide(body: Req, request: Request) -> Dict[str, Any]:
                   "busy_on_arrival": busy, "waiting_on_arrival": waiting,
                   "per_question_ms": per_q},
     }
+    if body.model == 'deepseek-flash':
+        response['usage'] = {k: sum(u[k] for u in usages) if all(u.get(k) is not None for u in usages) else None
+                             for k in ['input_tokens', 'output_tokens', 'total_tokens']}
+        response['cost_basis'] = 'peak_tariff_upper_bound'
+    return response
 
 
 class StressReq(BaseModel):
+    model: Literal['bonsai', 'deepseek-flash'] = 'bonsai'
     password: str = Field(max_length=200)
     state: str = Field(max_length=MAX_STATE_CHARS)
     questions: Dict[str, Question]
@@ -232,6 +286,8 @@ class StressReq(BaseModel):
 async def stress(body: StressReq, request: Request) -> Dict[str, Any]:
     """Fire STRESS_N requests at once, server side. Password-gated: this is the one
     thing a visitor could use to saturate the box on purpose."""
+    if body.model != 'bonsai':
+        raise HTTPException(400, 'Stress testing is Bonsai-only; paid DeepSeek bursts are disabled')
     if not STRESS_HASH:
         raise HTTPException(404, "stress testing is not enabled on this instance")
     given = hashlib.sha256(body.password.encode()).hexdigest()
@@ -275,7 +331,14 @@ async def stress(body: StressReq, request: Request) -> Dict[str, Any]:
 def get_stats() -> Dict[str, Any]:
     r = stats["requests"] or 1
     busy = stats["active"] >= SLOTS
-    return {"slots": SLOTS, "active": stats["active"], "waiting": stats["waiting"],
+    try:
+        budget = _deepseek.budget.snapshot() if _deepseek.available else None
+    except (BudgetUnavailable, OSError):
+        budget = {'unavailable': True}
+    return {"default_model": "bonsai", "models": {
+                "bonsai": {"available": True, "paid": False},
+                "deepseek-flash": {"available": _deepseek.available, "paid": True, "budget": budget}},
+            "slots": SLOTS, "active": stats["active"], "waiting": stats["waiting"],
             "requests": stats["requests"], "calls": stats["calls"],
             "rejected": stats["rejected"], "busy": busy,
             "max_waiting": MAX_WAITING, "max_questions": MAX_QUESTIONS,

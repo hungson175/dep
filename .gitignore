@@ -41,3 +41,8 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+
+# Private durable site budget and generated public release artifacts.
+runtime/
+static/packages/
+static/library.html
