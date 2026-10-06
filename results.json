@@ -114,6 +114,39 @@
       "inference_cost_usd_per_1000": 0.17793766233766237,
       "cost_basis": "original_API_peak_tariff_upper_bound",
       "latency_basis": "provider_http_round_trip"
+    },
+    {
+      "name": "Original Jev",
+      "model": "jev-1.13.0",
+      "planned": 231,
+      "correct": 199,
+      "valid": 231,
+      "accuracy": 0.8614718614718615,
+      "evidence": "fresh_original_typesafe_API_run",
+      "per_type": {
+        "choice": {
+          "count": 139,
+          "correct": 124
+        },
+        "noul": {
+          "count": 74,
+          "correct": 61
+        },
+        "score": {
+          "count": 18,
+          "correct": 14
+        }
+      },
+      "p50_s": 0.41808873508125544,
+      "p95_s": 0.5163431318942457,
+      "brier": 0.17999567099567096,
+      "ece": 0.048095238095238343,
+      "calibration_n": 231,
+      "inference_cost_usd_per_1000": 0.03841981818181817,
+      "cost_basis": "derived_usage_times_published_tariff_not_invoice",
+      "latency_basis": "provider_api_round_trip_wall",
+      "provider_cost_usd": 0.008874977999999999,
+      "no_retries": true
     }
   ],
   "deepseek_original_strict": {
@@ -131,7 +164,8 @@
     "deepseek_original": "c3fdc37233827ec55bdaf69acd0c4e33344092d5bd132363acd22c9ef8c6f3be",
     "deepseek_zero_fill": "f075d24c7a0a1e620b95ec1a67cef9553965db720e6c4b1da645f1ff85c4c5db",
     "bonsai_original_http": "0d33527e58544fa9b5aaa6a5583d270765a0bfe6186e15e5431e4d7d93491c19",
-    "bonsai_native_output": "f04f383e89cbff8f8017bc21f771c6b70a9b8c467b1d70ae8ef18e9c96549c8d"
+    "bonsai_native_output": "f04f383e89cbff8f8017bc21f771c6b70a9b8c467b1d70ae8ef18e9c96549c8d",
+    "jev_original": "30b3fd98a95857fbc9e7e45c0178d589fc62c6789c1af60f02219df9b13e116e"
   },
   "official_score": null,
   "official_rank": null,
@@ -142,7 +176,8 @@
     "Native Bonsai gets188/231. The archived HTTP run remains187/231; exact prompts/token IDs/token counts matched, one prediction changed, maximum probability delta0.01311.",
     "DeepSeek zero-fill remains offline replay, not new inference; its API latency/cost remain the original run.",
     "The current v1.6.1 P300 and scorer/O1S are not present in the public source checked; this231-case legacy diagnostic does not match that protocol.",
-    "Hardware/electricity unmeasured; no inference cost or official Capability/Composite/rank fabricated."
+    "Hardware/electricity unmeasured; no inference cost or official Capability/Composite/rank fabricated.",
+    "Original Jev is a fresh 231-call run using pinned upstream TypeSafe adapter and jev-1.13.0, native returned probabilities, no zero-fill, no retries; API round-trip timing, not locally observed model compute."
   ],
   "bonsai_original_http": {
     "planned": 231,
