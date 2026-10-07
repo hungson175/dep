@@ -88,9 +88,14 @@ class BenchmarkPageTests(unittest.TestCase):
             expect(page.get_by_text('81.39%', exact=True)).to_be_visible()
             expect(page.get_by_text('82.25%', exact=True)).to_be_visible()
             expect(page.get_by_text('Original Jev / jev-1.13.0', exact=True)).to_be_visible()
-            for width in [390, 1280]:
+            for width in [390, 768, 1024, 1280]:
                 page.set_viewport_size({'width': width, 'height': 900})
                 self.assertTrue(page.evaluate('document.documentElement.scrollWidth <= innerWidth'))
+                if width >= 768:
+                    boxes = page.locator('.scores .number').evaluate_all('(els) => els.map(e => ({y:e.getBoundingClientRect().top, h:e.getBoundingClientRect().height}))')
+                    self.assertEqual(len(boxes), 3)
+                    self.assertLess(max(b['y'] for b in boxes) - min(b['y'] for b in boxes), 1)
+                    self.assertLess(max(b['h'] for b in boxes) - min(b['h'] for b in boxes), 1)
             response = page.request.get(base + '/results.json')
             self.assertEqual(response.status, 200)
             self.assertEqual(response.json()['models'][0]['correct'], 188)
