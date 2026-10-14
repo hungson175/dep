@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import math
 import os
+import string
 import time
 import urllib.error
 import urllib.request
@@ -35,10 +36,20 @@ def validate_policy(policy):
         raise ValueError('missing_policy must be "zero" or "error"')
 
 
-def marks(n):
-    if isinstance(n, bool) or not isinstance(n, int) or not 1 <= n <= 35:
-        raise ValueError("options must contain 1 to 35 entries")
-    return ([str(i) for i in range(1, 10)] + [chr(65 + i) for i in range(26)])[:n]
+def marks(n, *, marker_scheme="legacy"):
+    if marker_scheme not in ("legacy", "letters52"):
+        raise ValueError('marker_scheme must be "legacy" or "letters52"')
+    alphabet = (list(string.ascii_lowercase + string.ascii_uppercase) if marker_scheme == "letters52"
+                else [str(i) for i in range(1, 10)] + list(string.ascii_uppercase))
+    if isinstance(n, bool) or not isinstance(n, int) or not 1 <= n <= len(alphabet):
+        raise ValueError(f"options must contain 1 to {len(alphabet)} entries")
+    return alphabet[:n]
+
+
+def marker_normalizer(labels):
+    # New single-letter answers are exact tokens: never fold case or spaces.
+    exact = all(len(t) == 1 and t in string.ascii_letters for t in labels.values())
+    return (lambda s: s) if exact else (lambda s: s.strip().casefold())
 
 
 def confidence(p):
@@ -46,7 +57,7 @@ def confidence(p):
     return round(top[0] - (top[1] if len(top) > 1 else 0.0), 4)
 
 
-def build_request(state, question, model="deepseek-flash"):
+def build_request(state, question, model="deepseek-flash", *, marker_scheme="legacy"):
     """Preserve the notebook's prompts and insertion order, including score 1..N."""
     if not isinstance(question, dict):
         raise ValueError("question must be a dictionary")
@@ -73,19 +84,25 @@ def build_request(state, question, model="deepseek-flash"):
             if not isinstance(criteria, dict) or any(not isinstance(k, str) for k in criteria):
                 raise ValueError("choice criteria must be a mapping or list of labels")
             keys = list(criteria)
-            tokens = marks(len(keys))
+            tokens = marks(len(keys), marker_scheme=marker_scheme)
             menu = "\n".join(f"{m}. {k} -- {criteria[k]}" for m, k in zip(tokens, keys))
             labels = dict(zip(keys, tokens))
             section = "Options"
         else:
             if not isinstance(criteria, list):
                 raise ValueError("score criteria must be a list")
-            tokens = marks(len(criteria))
+            tokens = marks(len(criteria), marker_scheme=marker_scheme)
             menu = "\n".join(f"{m}. {d}" for m, d in zip(tokens, criteria))
             labels = {str(i + 1): m for i, m in enumerate(tokens)}
             section = "Scale"
         body = (prefix + f"\n{section}:\n{menu}\n"
                 f"Reply with exactly one character: {', '.join(tokens)}.")
+        if marker_scheme == "letters52":
+            body = (f"Text:\n{state}\n\n{section}:\n{menu}\n"
+                    "Markers are case-sensitive: a and A are different answers. "
+                    "Copy the exact lowercase or uppercase marker. No spaces or punctuation.\n"
+                    f"Reply with exactly one character: {', '.join(tokens)}.\n"
+                    f"Question: {instructions}")
     else:
         raise ValueError("question type must be noul, choice, or score")
     return {
@@ -102,7 +119,7 @@ def candidate_probs(report, labels, *, missing_policy="zero"):
     At least one candidate must be reported; malformed reports still fail.
     """
     validate_policy(missing_policy)
-    norm = lambda s: s.strip().casefold()
+    norm = marker_normalizer(labels)
     if not labels or len({norm(t) for t in labels.values()}) != len(labels):
         raise DistributionError("empty or ambiguous candidate marks")
     if not isinstance(report, list):
@@ -151,9 +168,10 @@ def decode_response(out, labels, *, missing_policy="zero"):
 
 def missing_options(out, labels):
     """Call only after decode_response has validated the report."""
-    reported = {r["token"].strip().casefold()
+    norm = marker_normalizer(labels)
+    reported = {norm(r["token"])
                 for r in out["choices"][0]["logprobs"]["content"][0]["top_logprobs"]}
-    return [name for name, mark in labels.items() if mark.strip().casefold() not in reported]
+    return [name for name, mark in labels.items() if norm(mark) not in reported]
 
 
 @dataclass
@@ -163,6 +181,7 @@ class Decision:
     missing_options: list
     model: str
     usage: dict
+    reported_logprobs: dict | None = None
 
 
 @dataclass
@@ -172,9 +191,11 @@ class DeepSeekFlashClient:
     endpoint: str = "https://api.deepseek.com"
     timeout_s: float = 120.0
     missing_policy: str = "zero"
+    marker_scheme: str = "legacy"
 
     def __post_init__(self):
         validate_policy(self.missing_policy)
+        marks(1, marker_scheme=self.marker_scheme)
         if not isinstance(self.key, str) or not self.key.strip():
             raise ValueError("DEEPSEEK_API_KEY must be exported")
         self.key = self.key.strip()
@@ -186,9 +207,9 @@ class DeepSeekFlashClient:
             raise ValueError("credentials may only be sent to the official DeepSeek endpoint")
 
     @classmethod
-    def from_env(cls, *, missing_policy="zero"):
+    def from_env(cls, *, missing_policy="zero", marker_scheme="legacy"):
         # Intentionally no automatic .env loading or model-list request.
-        return cls(os.environ.get("DEEPSEEK_API_KEY", ""), missing_policy=missing_policy)
+        return cls(os.environ.get("DEEPSEEK_API_KEY", ""), missing_policy=missing_policy, marker_scheme=marker_scheme)
 
     def post(self, body):
         req = urllib.request.Request(
@@ -210,7 +231,7 @@ class DeepSeekFlashClient:
 
     def evaluate(self, state, question):
         """Return a typed decision plus diagnostics, with exactly one API call."""
-        body, labels = build_request(state, question, self.model)
+        body, labels = build_request(state, question, self.model, marker_scheme=self.marker_scheme)
         out = self.post(body)
         p, mass = decode_response(out, labels, missing_policy=self.missing_policy)
         usage = out.get("usage")
@@ -218,7 +239,12 @@ class DeepSeekFlashClient:
             usage = {}
         if not isinstance(usage, dict):
             raise DistributionError("malformed API usage")
-        return Decision(p, mass, missing_options(out, labels), out.get("model", self.model), usage)
+        native_logs = None
+        if self.marker_scheme == "letters52" and question["type"] in ("choice", "score"):
+            report = out["choices"][0]["logprobs"]["content"][0]["top_logprobs"]
+            token_logs = {row["token"]: row["logprob"] for row in report}
+            native_logs = {name: token_logs[mark] for name, mark in labels.items() if mark in token_logs}
+        return Decision(p, mass, missing_options(out, labels), out.get("model", self.model), usage, native_logs)
 
     def decide(self, state, question):
         return self.evaluate(state, question).probabilities
@@ -267,7 +293,7 @@ class JevBenchAdapter:
 
     def prepare(self, task):
         # Read only state and question; never expected, rationale or provenance.
-        body, labels = build_request(task.state, task.question, self.client.model)
+        body, labels = build_request(task.state, task.question, self.client.model, marker_scheme=self.client.marker_scheme)
         qtype = task.question["type"]
         rename = {k: k for k in labels}
         if qtype == "noul":

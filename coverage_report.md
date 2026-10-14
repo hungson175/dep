@@ -34,3 +34,26 @@ python -m coverage run --branch --source=dep_luna_decisions,benchmarks.jevbench_
 python -m coverage report -m
 python -m coverage html
 ```
+
+## DeepSeek letters52 mode
+
+15 October 2026. Explicit opt-in `marker_scheme="letters52"`; legacy prompts and
+35-marker mode remain unchanged. No deployed service or GitHub release replaced.
+
+- Full suite: **128 tests PASS; 3 pre-existing opt-in tests skipped**. Installed-wheel E2E enabled.
+- Coverage scope: `deepseek_flash`, `dep_deepseek.client`; **299/302 statements**, **92/96 branches**, combined **98.24%**. Public client100%, engine98%. This is a different scope from the Luna coverage above, not a coverage drop comparison.
+- Test-first evidence: five new regression tests failed before implementation; raw-logprob-ranking regression also failed before addition. Eight new tests now pass, covering case separation, no whitespace merge, 49-way transport, stable prefix/question-last layout, censoring/strict mode, raw ranking, cache usage and unknown-field handling.
+- Integration: sanitized VCR replay of two real synthetic49-option calls. Live public E2E selected category0 and category26 correctly; second call reported1,664cache-hit/153miss tokens. Only7/9bare markers were reported, so both top10 rankings are explicitly incomplete.
+- Offline official V4 tokenizer check:52bare markers eachone distinct token, exact roundtrip; hashes and token IDs recorded in `tests/fixtures/deepseek_v4_letters52_markers.json`. This is offline-tokenizer evidence, not a serverrevision attestation.
+- Installed-wheel E2E exercised both legacy and letters52 APIs outside the checkout, no live call. Disk HTML coverage: `htmlcov/index.html`.
+
+```sh
+uv build --offline --out-dir dist
+DEP_TEST_WHEEL="$PWD/dist/dep_deepseek-0.1.0-py3-none-any.whl" python -m coverage run --branch --source=deepseek_flash,dep_deepseek.client -m unittest discover -s tests
+python -m coverage report -m
+python -m coverage html
+```
+
+Remaining uncovered engine paths are pre-existing list-label validation,
+malformed-row handling and parse-failure handling. No runtime dependencies added;
+`tokenizers` is optional only for the standalone offline verification tool.

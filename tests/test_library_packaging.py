@@ -63,7 +63,14 @@ with patch('urllib.request.urlopen',return_value=io.BytesIO(json.dumps(out).enco
 assert result['choice']=='b'
 assert result['probabilities']=={'a':0.0,'b':1.0,'c':0.0}
 assert post.call_count==1
-print('Isolated installed-wheel E2E PASS; no live API calls')
+out['choices'][0]['logprobs']['content'][0]['top_logprobs']=[{'token':'A','logprob':0.0}]
+with patch('urllib.request.urlopen',return_value=io.BytesIO(json.dumps(out).encode())) as post:
+    result=dep_deepseek.DeepSeek(api_key='TEST_ONLY',marker_scheme='letters52').choice('cards','QUERY_LAST', ['c'+str(i) for i in range(49)])
+assert result['choice']=='c26'
+assert result['diagnostics']['reported_ranking']==['c26']
+assert len(result['probabilities'])==49
+assert not result['diagnostics']['top10_supported']
+print('Isolated installed-wheel E2E PASS; legacy and letters52; no live API calls')
 '''.replace('TARGET', repr(str(target)))
             subprocess.run([sys.executable, '-I', '-c', code], cwd=tmp, check=True)
 

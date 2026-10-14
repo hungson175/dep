@@ -151,3 +151,85 @@ calls; the fixture includes one sanitized recorded missing-option response.
 - Optional strict mode: `missing_policy="error"`.
 - Credentials and API costs belong to the consumer; no automatic retries or budget cap.
 - Distribution: GitHub release wheel and pinned source; not PyPI.
+
+## 52 case-sensitive options (source checkout)
+
+The existing v0.1.0 release and default `marker_scheme="legacy"` preserve the
+35-option notebook recipe. For up to **52** choices, use the latest source
+checkout and explicitly select `letters52`:
+
+```python
+from dep_deepseek import DeepSeek
+
+dep = DeepSeek(marker_scheme="letters52")  # Exported personal DEEPSEEK_API_KEY.
+options = {f"category_{i}": f"Owns category {i}" for i in range(49)}
+result = dep.predict(
+    full_cards_text,  # Stable reference text only; no changing question here.
+    {"route": {"type": "choice", "criteria": options,
+               "instructions": "Select the owner of this question: " + question_text}},
+)
+answer = result["answers"]["route"]
+print(answer["choice"], answer["probabilities"])
+print(answer["diagnostics"])
+print(result["usage"]["prompt_cache_hit_tokens"])
+print(result["usage"]["prompt_cache_miss_tokens"])
+```
+
+Markers are `a`–`z`, then `A`–`Z`: **a and A are distinct**. In this mode the
+matcher accepts exact bare markers only, without case-folding or stripping
+spaces. Full reference text comes first; options and encoding rules follow;
+the changing question is last. Keep reference text, options and order stable
+for provider prefix caching. The library does not promise cache hits or add a
+local response cache. Cache usage is returned per answer, and aggregated in
+`predict`; unavailable fields remain `None`, not invented zeros.
+
+### Tokenizer verification and live public checks
+
+On 15 October 2026, all52 bare markers each encoded to **one distinct token**
+and decoded exactly in the official published DeepSeek V4 tokenizer. Space
+prefixes are different encodings, not aliases; the matcher does not merge them.
+Evidence: `tests/fixtures/deepseek_v4_letters52_markers.json`, including archive
+and tokenizer hashes. This verifies the published offline tokenizer, not an
+independent attestation of the hosted model's exact tokenizer revision.
+
+Reproduce offline with optional developer dependency `tokenizers`:
+
+```sh
+curl -fL https://cdn.deepseek.com/api-docs/deepseek_v4_tokenizer.zip -o /tmp/deepseek_v4_tokenizer.zip
+python tools/check_deepseek_letters52.py /tmp/deepseek_v4_tokenizer.zip
+```
+
+Two synthetic49-option end-to-end calls correctly selected category0 (`a`)
+and category26 (`A`). The second call reported **1,664 cache-hit /153 miss
+tokens**; the first reported0hits /1,817misses. Sanitized VCR replay:
+`tests/fixtures/deepseek_letters52_public.yaml`. No private company data is
+present in those examples or fixtures.
+
+### Top-20 censorship and recall@10
+
+`top_logprobs=20` returns at most20 **vocabulary tokens**, not20 option markers.
+Whitespace-prefixed tokens, punctuation and other tokens can occupy slots.
+The synthetic calls returned only **7 and9 exact markers** respectively, so
+neither provided a fully observed top10 candidate ranking.
+
+The diagnostics expose `reported_options_count`, `missing_options`,
+`candidate_mass`, `reported_logprobs`, `reported_ranking`, and `top10_supported`.
+Use `reported_ranking[:10]` for top-k: it sorts raw logprobs and excludes missing
+options, avoiding underflow and zero-fill ties. With at least10 exact reported
+candidates, sorting their probabilities preserves the observed top10 candidate
+ranking. Otherwise report the ranking as **censored/incomplete**. Do not fill
+out a top10 list with zero-filled missing options and call it measured recall.
+A hit among the observed fewer-than10 candidates is a valid hit, but a missing
+gold could still be in the unobserved tail; report censored coverage separately.
+Ties at a truncated boundary can leave rank membership ambiguous.
+
+Missing probabilities remain the explicit zero-fill approximation by default,
+not measured zeros. Full49/52-option calibrated probabilities, Brier/ECE and
+precise NO-DOMAIN/clarify probabilities cannot be established from this censored
+window. `missing_policy="error"` rejects incomplete reports; with more than20
+choices a full distribution is impossible from this request alone. No logits
+bias, extra scoring calls, or fabricated probabilities are used.
+
+Sources: [tokenizer](https://api-docs.deepseek.com/quick_start/token_usage/),
+[Chat API](https://api-docs.deepseek.com/api/create-chat-completion/),
+[prefix cache](https://api-docs.deepseek.com/guides/kv_cache/).

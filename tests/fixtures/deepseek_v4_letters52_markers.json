@@ -1,0 +1,634 @@
+{
+  "source_url": "https://cdn.deepseek.com/api-docs/deepseek_v4_tokenizer.zip",
+  "downloaded_date": "2026-10-15",
+  "archive_sha256": "e7310d1dafe0a86d8a5629fe78a7c763760f651db9b8682718a1781dcd6fe495",
+  "tokenizer_json_sha256": "89085f12ef79460ac5f66d1119325ddfc694b4ab209d80bbd81d35f081dc9614",
+  "add_special_tokens": false,
+  "scope": "Official published V4 offline tokenizer; not a server tokenizer-ID attestation.",
+  "markers": [
+    {
+      "marker": "a",
+      "token_id": 67,
+      "token": "a",
+      "space_prefix_ids": [
+        260
+      ],
+      "newline_prefix_ids": [
+        201,
+        67
+      ]
+    },
+    {
+      "marker": "b",
+      "token_id": 68,
+      "token": "b",
+      "space_prefix_ids": [
+        291
+      ],
+      "newline_prefix_ids": [
+        201,
+        68
+      ]
+    },
+    {
+      "marker": "c",
+      "token_id": 69,
+      "token": "c",
+      "space_prefix_ids": [
+        274
+      ],
+      "newline_prefix_ids": [
+        201,
+        69
+      ]
+    },
+    {
+      "marker": "d",
+      "token_id": 70,
+      "token": "d",
+      "space_prefix_ids": [
+        283
+      ],
+      "newline_prefix_ids": [
+        201,
+        70
+      ]
+    },
+    {
+      "marker": "e",
+      "token_id": 71,
+      "token": "e",
+      "space_prefix_ids": [
+        312
+      ],
+      "newline_prefix_ids": [
+        201,
+        71
+      ]
+    },
+    {
+      "marker": "f",
+      "token_id": 72,
+      "token": "f",
+      "space_prefix_ids": [
+        285
+      ],
+      "newline_prefix_ids": [
+        201,
+        72
+      ]
+    },
+    {
+      "marker": "g",
+      "token_id": 73,
+      "token": "g",
+      "space_prefix_ids": [
+        336
+      ],
+      "newline_prefix_ids": [
+        201,
+        73
+      ]
+    },
+    {
+      "marker": "h",
+      "token_id": 74,
+      "token": "h",
+      "space_prefix_ids": [
+        310
+      ],
+      "newline_prefix_ids": [
+        201,
+        74
+      ]
+    },
+    {
+      "marker": "i",
+      "token_id": 75,
+      "token": "i",
+      "space_prefix_ids": [
+        1008
+      ],
+      "newline_prefix_ids": [
+        201,
+        75
+      ]
+    },
+    {
+      "marker": "j",
+      "token_id": 76,
+      "token": "j",
+      "space_prefix_ids": [
+        597
+      ],
+      "newline_prefix_ids": [
+        201,
+        76
+      ]
+    },
+    {
+      "marker": "k",
+      "token_id": 77,
+      "token": "k",
+      "space_prefix_ids": [
+        473
+      ],
+      "newline_prefix_ids": [
+        201,
+        77
+      ]
+    },
+    {
+      "marker": "l",
+      "token_id": 78,
+      "token": "l",
+      "space_prefix_ids": [
+        314
+      ],
+      "newline_prefix_ids": [
+        201,
+        78
+      ]
+    },
+    {
+      "marker": "m",
+      "token_id": 79,
+      "token": "m",
+      "space_prefix_ids": [
+        292
+      ],
+      "newline_prefix_ids": [
+        201,
+        79
+      ]
+    },
+    {
+      "marker": "n",
+      "token_id": 80,
+      "token": "n",
+      "space_prefix_ids": [
+        313
+      ],
+      "newline_prefix_ids": [
+        201,
+        80
+      ]
+    },
+    {
+      "marker": "o",
+      "token_id": 81,
+      "token": "o",
+      "space_prefix_ids": [
+        277
+      ],
+      "newline_prefix_ids": [
+        201,
+        81
+      ]
+    },
+    {
+      "marker": "p",
+      "token_id": 82,
+      "token": "p",
+      "space_prefix_ids": [
+        280
+      ],
+      "newline_prefix_ids": [
+        201,
+        82
+      ]
+    },
+    {
+      "marker": "q",
+      "token_id": 83,
+      "token": "q",
+      "space_prefix_ids": [
+        5618
+      ],
+      "newline_prefix_ids": [
+        201,
+        83
+      ]
+    },
+    {
+      "marker": "r",
+      "token_id": 84,
+      "token": "r",
+      "space_prefix_ids": [
+        494
+      ],
+      "newline_prefix_ids": [
+        201,
+        84
+      ]
+    },
+    {
+      "marker": "s",
+      "token_id": 85,
+      "token": "s",
+      "space_prefix_ids": [
+        269
+      ],
+      "newline_prefix_ids": [
+        201,
+        85
+      ]
+    },
+    {
+      "marker": "t",
+      "token_id": 86,
+      "token": "t",
+      "space_prefix_ids": [
+        259
+      ],
+      "newline_prefix_ids": [
+        201,
+        86
+      ]
+    },
+    {
+      "marker": "u",
+      "token_id": 87,
+      "token": "u",
+      "space_prefix_ids": [
+        549
+      ],
+      "newline_prefix_ids": [
+        201,
+        87
+      ]
+    },
+    {
+      "marker": "v",
+      "token_id": 88,
+      "token": "v",
+      "space_prefix_ids": [
+        374
+      ],
+      "newline_prefix_ids": [
+        201,
+        88
+      ]
+    },
+    {
+      "marker": "w",
+      "token_id": 89,
+      "token": "w",
+      "space_prefix_ids": [
+        281
+      ],
+      "newline_prefix_ids": [
+        201,
+        89
+      ]
+    },
+    {
+      "marker": "x",
+      "token_id": 90,
+      "token": "x",
+      "space_prefix_ids": [
+        1527
+      ],
+      "newline_prefix_ids": [
+        201,
+        90
+      ]
+    },
+    {
+      "marker": "y",
+      "token_id": 91,
+      "token": "y",
+      "space_prefix_ids": [
+        383
+      ],
+      "newline_prefix_ids": [
+        201,
+        91
+      ]
+    },
+    {
+      "marker": "z",
+      "token_id": 92,
+      "token": "z",
+      "space_prefix_ids": [
+        961
+      ],
+      "newline_prefix_ids": [
+        201,
+        92
+      ]
+    },
+    {
+      "marker": "A",
+      "token_id": 35,
+      "token": "A",
+      "space_prefix_ids": [
+        334
+      ],
+      "newline_prefix_ids": [
+        201,
+        35
+      ]
+    },
+    {
+      "marker": "B",
+      "token_id": 36,
+      "token": "B",
+      "space_prefix_ids": [
+        406
+      ],
+      "newline_prefix_ids": [
+        201,
+        36
+      ]
+    },
+    {
+      "marker": "C",
+      "token_id": 37,
+      "token": "C",
+      "space_prefix_ids": [
+        345
+      ],
+      "newline_prefix_ids": [
+        201,
+        37
+      ]
+    },
+    {
+      "marker": "D",
+      "token_id": 38,
+      "token": "D",
+      "space_prefix_ids": [
+        420
+      ],
+      "newline_prefix_ids": [
+        201,
+        38
+      ]
+    },
+    {
+      "marker": "E",
+      "token_id": 39,
+      "token": "E",
+      "space_prefix_ids": [
+        446
+      ],
+      "newline_prefix_ids": [
+        201,
+        39
+      ]
+    },
+    {
+      "marker": "F",
+      "token_id": 40,
+      "token": "F",
+      "space_prefix_ids": [
+        447
+      ],
+      "newline_prefix_ids": [
+        201,
+        40
+      ]
+    },
+    {
+      "marker": "G",
+      "token_id": 41,
+      "token": "G",
+      "space_prefix_ids": [
+        489
+      ],
+      "newline_prefix_ids": [
+        201,
+        41
+      ]
+    },
+    {
+      "marker": "H",
+      "token_id": 42,
+      "token": "H",
+      "space_prefix_ids": [
+        437
+      ],
+      "newline_prefix_ids": [
+        201,
+        42
+      ]
+    },
+    {
+      "marker": "I",
+      "token_id": 43,
+      "token": "I",
+      "space_prefix_ids": [
+        342
+      ],
+      "newline_prefix_ids": [
+        201,
+        43
+      ]
+    },
+    {
+      "marker": "J",
+      "token_id": 44,
+      "token": "J",
+      "space_prefix_ids": [
+        552
+      ],
+      "newline_prefix_ids": [
+        201,
+        44
+      ]
+    },
+    {
+      "marker": "K",
+      "token_id": 45,
+      "token": "K",
+      "space_prefix_ids": [
+        657
+      ],
+      "newline_prefix_ids": [
+        201,
+        45
+      ]
+    },
+    {
+      "marker": "L",
+      "token_id": 46,
+      "token": "L",
+      "space_prefix_ids": [
+        462
+      ],
+      "newline_prefix_ids": [
+        201,
+        46
+      ]
+    },
+    {
+      "marker": "M",
+      "token_id": 47,
+      "token": "M",
+      "space_prefix_ids": [
+        373
+      ],
+      "newline_prefix_ids": [
+        201,
+        47
+      ]
+    },
+    {
+      "marker": "N",
+      "token_id": 48,
+      "token": "N",
+      "space_prefix_ids": [
+        471
+      ],
+      "newline_prefix_ids": [
+        201,
+        48
+      ]
+    },
+    {
+      "marker": "O",
+      "token_id": 49,
+      "token": "O",
+      "space_prefix_ids": [
+        541
+      ],
+      "newline_prefix_ids": [
+        201,
+        49
+      ]
+    },
+    {
+      "marker": "P",
+      "token_id": 50,
+      "token": "P",
+      "space_prefix_ids": [
+        380
+      ],
+      "newline_prefix_ids": [
+        201,
+        50
+      ]
+    },
+    {
+      "marker": "Q",
+      "token_id": 51,
+      "token": "Q",
+      "space_prefix_ids": [
+        1646
+      ],
+      "newline_prefix_ids": [
+        201,
+        51
+      ]
+    },
+    {
+      "marker": "R",
+      "token_id": 52,
+      "token": "R",
+      "space_prefix_ids": [
+        433
+      ],
+      "newline_prefix_ids": [
+        201,
+        52
+      ]
+    },
+    {
+      "marker": "S",
+      "token_id": 53,
+      "token": "S",
+      "space_prefix_ids": [
+        327
+      ],
+      "newline_prefix_ids": [
+        201,
+        53
+      ]
+    },
+    {
+      "marker": "T",
+      "token_id": 54,
+      "token": "T",
+      "space_prefix_ids": [
+        330
+      ],
+      "newline_prefix_ids": [
+        201,
+        54
+      ]
+    },
+    {
+      "marker": "U",
+      "token_id": 55,
+      "token": "U",
+      "space_prefix_ids": [
+        628
+      ],
+      "newline_prefix_ids": [
+        201,
+        55
+      ]
+    },
+    {
+      "marker": "V",
+      "token_id": 56,
+      "token": "V",
+      "space_prefix_ids": [
+        721
+      ],
+      "newline_prefix_ids": [
+        201,
+        56
+      ]
+    },
+    {
+      "marker": "W",
+      "token_id": 57,
+      "token": "W",
+      "space_prefix_ids": [
+        448
+      ],
+      "newline_prefix_ids": [
+        201,
+        57
+      ]
+    },
+    {
+      "marker": "X",
+      "token_id": 58,
+      "token": "X",
+      "space_prefix_ids": [
+        2137
+      ],
+      "newline_prefix_ids": [
+        201,
+        58
+      ]
+    },
+    {
+      "marker": "Y",
+      "token_id": 59,
+      "token": "Y",
+      "space_prefix_ids": [
+        894
+      ],
+      "newline_prefix_ids": [
+        201,
+        59
+      ]
+    },
+    {
+      "marker": "Z",
+      "token_id": 60,
+      "token": "Z",
+      "space_prefix_ids": [
+        1653
+      ],
+      "newline_prefix_ids": [
+        201,
+        60
+      ]
+    }
+  ]
+}

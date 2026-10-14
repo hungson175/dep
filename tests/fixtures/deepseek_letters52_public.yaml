@@ -1,0 +1,318 @@
+interactions:
+- request:
+    body: '{"model": "deepseek-flash", "messages": [{"role": "user", "content": "Text:\nPublic
+      synthetic card category_0: owns questions explicitly naming category_0. No other
+      ownership.\nPublic synthetic card category_1: owns questions explicitly naming
+      category_1. No other ownership.\nPublic synthetic card category_2: owns questions
+      explicitly naming category_2. No other ownership.\nPublic synthetic card category_3:
+      owns questions explicitly naming category_3. No other ownership.\nPublic synthetic
+      card category_4: owns questions explicitly naming category_4. No other ownership.\nPublic
+      synthetic card category_5: owns questions explicitly naming category_5. No other
+      ownership.\nPublic synthetic card category_6: owns questions explicitly naming
+      category_6. No other ownership.\nPublic synthetic card category_7: owns questions
+      explicitly naming category_7. No other ownership.\nPublic synthetic card category_8:
+      owns questions explicitly naming category_8. No other ownership.\nPublic synthetic
+      card category_9: owns questions explicitly naming category_9. No other ownership.\nPublic
+      synthetic card category_10: owns questions explicitly naming category_10. No
+      other ownership.\nPublic synthetic card category_11: owns questions explicitly
+      naming category_11. No other ownership.\nPublic synthetic card category_12:
+      owns questions explicitly naming category_12. No other ownership.\nPublic synthetic
+      card category_13: owns questions explicitly naming category_13. No other ownership.\nPublic
+      synthetic card category_14: owns questions explicitly naming category_14. No
+      other ownership.\nPublic synthetic card category_15: owns questions explicitly
+      naming category_15. No other ownership.\nPublic synthetic card category_16:
+      owns questions explicitly naming category_16. No other ownership.\nPublic synthetic
+      card category_17: owns questions explicitly naming category_17. No other ownership.\nPublic
+      synthetic card category_18: owns questions explicitly naming category_18. No
+      other ownership.\nPublic synthetic card category_19: owns questions explicitly
+      naming category_19. No other ownership.\nPublic synthetic card category_20:
+      owns questions explicitly naming category_20. No other ownership.\nPublic synthetic
+      card category_21: owns questions explicitly naming category_21. No other ownership.\nPublic
+      synthetic card category_22: owns questions explicitly naming category_22. No
+      other ownership.\nPublic synthetic card category_23: owns questions explicitly
+      naming category_23. No other ownership.\nPublic synthetic card category_24:
+      owns questions explicitly naming category_24. No other ownership.\nPublic synthetic
+      card category_25: owns questions explicitly naming category_25. No other ownership.\nPublic
+      synthetic card category_26: owns questions explicitly naming category_26. No
+      other ownership.\nPublic synthetic card category_27: owns questions explicitly
+      naming category_27. No other ownership.\nPublic synthetic card category_28:
+      owns questions explicitly naming category_28. No other ownership.\nPublic synthetic
+      card category_29: owns questions explicitly naming category_29. No other ownership.\nPublic
+      synthetic card category_30: owns questions explicitly naming category_30. No
+      other ownership.\nPublic synthetic card category_31: owns questions explicitly
+      naming category_31. No other ownership.\nPublic synthetic card category_32:
+      owns questions explicitly naming category_32. No other ownership.\nPublic synthetic
+      card category_33: owns questions explicitly naming category_33. No other ownership.\nPublic
+      synthetic card category_34: owns questions explicitly naming category_34. No
+      other ownership.\nPublic synthetic card category_35: owns questions explicitly
+      naming category_35. No other ownership.\nPublic synthetic card category_36:
+      owns questions explicitly naming category_36. No other ownership.\nPublic synthetic
+      card category_37: owns questions explicitly naming category_37. No other ownership.\nPublic
+      synthetic card category_38: owns questions explicitly naming category_38. No
+      other ownership.\nPublic synthetic card category_39: owns questions explicitly
+      naming category_39. No other ownership.\nPublic synthetic card category_40:
+      owns questions explicitly naming category_40. No other ownership.\nPublic synthetic
+      card category_41: owns questions explicitly naming category_41. No other ownership.\nPublic
+      synthetic card category_42: owns questions explicitly naming category_42. No
+      other ownership.\nPublic synthetic card category_43: owns questions explicitly
+      naming category_43. No other ownership.\nPublic synthetic card category_44:
+      owns questions explicitly naming category_44. No other ownership.\nPublic synthetic
+      card category_45: owns questions explicitly naming category_45. No other ownership.\nPublic
+      synthetic card category_46: owns questions explicitly naming category_46. No
+      other ownership.\nPublic synthetic card category_47: owns questions explicitly
+      naming category_47. No other ownership.\nPublic synthetic card category_48:
+      owns questions explicitly naming category_48. No other ownership.\n\nOptions:\na.
+      category_0 -- Owns questions explicitly naming category_0.\nb. category_1 --
+      Owns questions explicitly naming category_1.\nc. category_2 -- Owns questions
+      explicitly naming category_2.\nd. category_3 -- Owns questions explicitly naming
+      category_3.\ne. category_4 -- Owns questions explicitly naming category_4.\nf.
+      category_5 -- Owns questions explicitly naming category_5.\ng. category_6 --
+      Owns questions explicitly naming category_6.\nh. category_7 -- Owns questions
+      explicitly naming category_7.\ni. category_8 -- Owns questions explicitly naming
+      category_8.\nj. category_9 -- Owns questions explicitly naming category_9.\nk.
+      category_10 -- Owns questions explicitly naming category_10.\nl. category_11
+      -- Owns questions explicitly naming category_11.\nm. category_12 -- Owns questions
+      explicitly naming category_12.\nn. category_13 -- Owns questions explicitly
+      naming category_13.\no. category_14 -- Owns questions explicitly naming category_14.\np.
+      category_15 -- Owns questions explicitly naming category_15.\nq. category_16
+      -- Owns questions explicitly naming category_16.\nr. category_17 -- Owns questions
+      explicitly naming category_17.\ns. category_18 -- Owns questions explicitly
+      naming category_18.\nt. category_19 -- Owns questions explicitly naming category_19.\nu.
+      category_20 -- Owns questions explicitly naming category_20.\nv. category_21
+      -- Owns questions explicitly naming category_21.\nw. category_22 -- Owns questions
+      explicitly naming category_22.\nx. category_23 -- Owns questions explicitly
+      naming category_23.\ny. category_24 -- Owns questions explicitly naming category_24.\nz.
+      category_25 -- Owns questions explicitly naming category_25.\nA. category_26
+      -- Owns questions explicitly naming category_26.\nB. category_27 -- Owns questions
+      explicitly naming category_27.\nC. category_28 -- Owns questions explicitly
+      naming category_28.\nD. category_29 -- Owns questions explicitly naming category_29.\nE.
+      category_30 -- Owns questions explicitly naming category_30.\nF. category_31
+      -- Owns questions explicitly naming category_31.\nG. category_32 -- Owns questions
+      explicitly naming category_32.\nH. category_33 -- Owns questions explicitly
+      naming category_33.\nI. category_34 -- Owns questions explicitly naming category_34.\nJ.
+      category_35 -- Owns questions explicitly naming category_35.\nK. category_36
+      -- Owns questions explicitly naming category_36.\nL. category_37 -- Owns questions
+      explicitly naming category_37.\nM. category_38 -- Owns questions explicitly
+      naming category_38.\nN. category_39 -- Owns questions explicitly naming category_39.\nO.
+      category_40 -- Owns questions explicitly naming category_40.\nP. category_41
+      -- Owns questions explicitly naming category_41.\nQ. category_42 -- Owns questions
+      explicitly naming category_42.\nR. category_43 -- Owns questions explicitly
+      naming category_43.\nS. category_44 -- Owns questions explicitly naming category_44.\nT.
+      category_45 -- Owns questions explicitly naming category_45.\nU. category_46
+      -- Owns questions explicitly naming category_46.\nV. category_47 -- Owns questions
+      explicitly naming category_47.\nW. category_48 -- Owns questions explicitly
+      naming category_48.\nMarkers are case-sensitive: a and A are different answers.
+      Copy the exact lowercase or uppercase marker. No spaces or punctuation.\nReply
+      with exactly one character: a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p,
+      q, r, s, t, u, v, w, x, y, z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P,
+      Q, R, S, T, U, V, W.\nQuestion: Select the category explicitly named here: category_0."}],
+      "max_tokens": 1, "temperature": 1.0, "thinking": {"type": "disabled"}, "logprobs":
+      true, "top_logprobs": 20}'
+    headers:
+      Connection:
+      - close
+      Content-Length:
+      - '8723'
+      Content-Type:
+      - application/json
+      Host:
+      - api.deepseek.com
+      User-Agent:
+      - Python-urllib/3.10
+    method: POST
+    uri: https://api.deepseek.com/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"6fe96775-aae4-4fb8-841f-8608a4311651\",\"object\":\"chat.completion\",\"created\":1792014101,\"model\":\"deepseek-flash\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"a\"},\"logprobs\":{\"content\":[{\"token\":\"a\",\"logprob\":-0.00010918975,\"bytes\":[97],\"top_logprobs\":[{\"token\":\"a\",\"logprob\":-0.00010918975,\"bytes\":[97]},{\"token\":\"The\",\"logprob\":-11.213835,\"bytes\":[84,104,101]},{\"token\":\"Select\",\"logprob\":-11.23188,\"bytes\":[83,101,108,101,99,116]},{\"token\":\"category\",\"logprob\":-11.419323,\"bytes\":[99,97,116,101,103,111,114,121]},{\"token\":\"A\",\"logprob\":-11.930613,\"bytes\":[65]},{\"token\":\"Own\",\"logprob\":-11.93778,\"bytes\":[79,119,110]},{\"token\":\"I\",\"logprob\":-12.273846,\"bytes\":[73]},{\"token\":\"Category\",\"logprob\":-12.542051,\"bytes\":[67,97,116,101,103,111,114,121]},{\"token\":\"Public\",\"logprob\":-12.681194,\"bytes\":[80,117,98,108,105,99]},{\"token\":\"\\\"\",\"logprob\":-12.7956295,\"bytes\":[34]},{\"token\":\"<\uFF5C\uFF5Cend\u2581of\u2581sentence\uFF5C\uFF5C>\",\"logprob\":-13.123688,\"bytes\":[60,239,189,156,239,189,156,101,110,100,226,150,129,111,102,226,150,129,115,101,110,116,101,110,99,101,239,189,156,239,189,156,62]},{\"token\":\"If\",\"logprob\":-13.317968,\"bytes\":[73,102]},{\"token\":\"c\",\"logprob\":-13.3558235,\"bytes\":[99]},{\"token\":\"select\",\"logprob\":-13.392469,\"bytes\":[115,101,108,101,99,116]},{\"token\":\"q\",\"logprob\":-13.608317,\"bytes\":[113]},{\"token\":\"\\n\\n\",\"logprob\":-13.654275,\"bytes\":[10,10]},{\"token\":\"mark\",\"logprob\":-13.660369,\"bytes\":[109,97,114,107]},{\"token\":\"e\",\"logprob\":-13.6940975,\"bytes\":[101]},{\"token\":\"m\",\"logprob\":-13.705534,\"bytes\":[109]},{\"token\":\"Since\",\"logprob\":-13.852156,\"bytes\":[83,105,110,99,101]}]}]},\"finish_reason\":\"length\"}],\"usage\":{\"prompt_tokens\":1817,\"completion_tokens\":1,\"total_tokens\":1818,\"prompt_tokens_details\":{\"cached_tokens\":0},\"prompt_cache_hit_tokens\":0,\"prompt_cache_miss_tokens\":1817},\"system_fingerprint\":\"aeb56401ca74e127821c4f9126dcb669\"}"
+    headers:
+      Connection:
+      - close
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 14 Oct 2026 21:41:41 GMT
+      Server:
+      - elb
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      Via:
+      - 1.1 ec37f8318d434db007249052056f9936.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - 2mJf5sYdndCb0IIpZK5t7Ou25HjqizzTjthtJB3ISquy4_BUp6BPbg==
+      X-Amz-Cf-Pop:
+      - HAN50-P2
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      access-control-allow-credentials:
+      - 'true'
+      vary:
+      - accept-encoding
+      - origin, access-control-request-method, access-control-request-headers
+      x-ds-trace-id:
+      - 47c53cd323b106f3d8c364448fb5ddad
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"model": "deepseek-flash", "messages": [{"role": "user", "content": "Text:\nPublic
+      synthetic card category_0: owns questions explicitly naming category_0. No other
+      ownership.\nPublic synthetic card category_1: owns questions explicitly naming
+      category_1. No other ownership.\nPublic synthetic card category_2: owns questions
+      explicitly naming category_2. No other ownership.\nPublic synthetic card category_3:
+      owns questions explicitly naming category_3. No other ownership.\nPublic synthetic
+      card category_4: owns questions explicitly naming category_4. No other ownership.\nPublic
+      synthetic card category_5: owns questions explicitly naming category_5. No other
+      ownership.\nPublic synthetic card category_6: owns questions explicitly naming
+      category_6. No other ownership.\nPublic synthetic card category_7: owns questions
+      explicitly naming category_7. No other ownership.\nPublic synthetic card category_8:
+      owns questions explicitly naming category_8. No other ownership.\nPublic synthetic
+      card category_9: owns questions explicitly naming category_9. No other ownership.\nPublic
+      synthetic card category_10: owns questions explicitly naming category_10. No
+      other ownership.\nPublic synthetic card category_11: owns questions explicitly
+      naming category_11. No other ownership.\nPublic synthetic card category_12:
+      owns questions explicitly naming category_12. No other ownership.\nPublic synthetic
+      card category_13: owns questions explicitly naming category_13. No other ownership.\nPublic
+      synthetic card category_14: owns questions explicitly naming category_14. No
+      other ownership.\nPublic synthetic card category_15: owns questions explicitly
+      naming category_15. No other ownership.\nPublic synthetic card category_16:
+      owns questions explicitly naming category_16. No other ownership.\nPublic synthetic
+      card category_17: owns questions explicitly naming category_17. No other ownership.\nPublic
+      synthetic card category_18: owns questions explicitly naming category_18. No
+      other ownership.\nPublic synthetic card category_19: owns questions explicitly
+      naming category_19. No other ownership.\nPublic synthetic card category_20:
+      owns questions explicitly naming category_20. No other ownership.\nPublic synthetic
+      card category_21: owns questions explicitly naming category_21. No other ownership.\nPublic
+      synthetic card category_22: owns questions explicitly naming category_22. No
+      other ownership.\nPublic synthetic card category_23: owns questions explicitly
+      naming category_23. No other ownership.\nPublic synthetic card category_24:
+      owns questions explicitly naming category_24. No other ownership.\nPublic synthetic
+      card category_25: owns questions explicitly naming category_25. No other ownership.\nPublic
+      synthetic card category_26: owns questions explicitly naming category_26. No
+      other ownership.\nPublic synthetic card category_27: owns questions explicitly
+      naming category_27. No other ownership.\nPublic synthetic card category_28:
+      owns questions explicitly naming category_28. No other ownership.\nPublic synthetic
+      card category_29: owns questions explicitly naming category_29. No other ownership.\nPublic
+      synthetic card category_30: owns questions explicitly naming category_30. No
+      other ownership.\nPublic synthetic card category_31: owns questions explicitly
+      naming category_31. No other ownership.\nPublic synthetic card category_32:
+      owns questions explicitly naming category_32. No other ownership.\nPublic synthetic
+      card category_33: owns questions explicitly naming category_33. No other ownership.\nPublic
+      synthetic card category_34: owns questions explicitly naming category_34. No
+      other ownership.\nPublic synthetic card category_35: owns questions explicitly
+      naming category_35. No other ownership.\nPublic synthetic card category_36:
+      owns questions explicitly naming category_36. No other ownership.\nPublic synthetic
+      card category_37: owns questions explicitly naming category_37. No other ownership.\nPublic
+      synthetic card category_38: owns questions explicitly naming category_38. No
+      other ownership.\nPublic synthetic card category_39: owns questions explicitly
+      naming category_39. No other ownership.\nPublic synthetic card category_40:
+      owns questions explicitly naming category_40. No other ownership.\nPublic synthetic
+      card category_41: owns questions explicitly naming category_41. No other ownership.\nPublic
+      synthetic card category_42: owns questions explicitly naming category_42. No
+      other ownership.\nPublic synthetic card category_43: owns questions explicitly
+      naming category_43. No other ownership.\nPublic synthetic card category_44:
+      owns questions explicitly naming category_44. No other ownership.\nPublic synthetic
+      card category_45: owns questions explicitly naming category_45. No other ownership.\nPublic
+      synthetic card category_46: owns questions explicitly naming category_46. No
+      other ownership.\nPublic synthetic card category_47: owns questions explicitly
+      naming category_47. No other ownership.\nPublic synthetic card category_48:
+      owns questions explicitly naming category_48. No other ownership.\n\nOptions:\na.
+      category_0 -- Owns questions explicitly naming category_0.\nb. category_1 --
+      Owns questions explicitly naming category_1.\nc. category_2 -- Owns questions
+      explicitly naming category_2.\nd. category_3 -- Owns questions explicitly naming
+      category_3.\ne. category_4 -- Owns questions explicitly naming category_4.\nf.
+      category_5 -- Owns questions explicitly naming category_5.\ng. category_6 --
+      Owns questions explicitly naming category_6.\nh. category_7 -- Owns questions
+      explicitly naming category_7.\ni. category_8 -- Owns questions explicitly naming
+      category_8.\nj. category_9 -- Owns questions explicitly naming category_9.\nk.
+      category_10 -- Owns questions explicitly naming category_10.\nl. category_11
+      -- Owns questions explicitly naming category_11.\nm. category_12 -- Owns questions
+      explicitly naming category_12.\nn. category_13 -- Owns questions explicitly
+      naming category_13.\no. category_14 -- Owns questions explicitly naming category_14.\np.
+      category_15 -- Owns questions explicitly naming category_15.\nq. category_16
+      -- Owns questions explicitly naming category_16.\nr. category_17 -- Owns questions
+      explicitly naming category_17.\ns. category_18 -- Owns questions explicitly
+      naming category_18.\nt. category_19 -- Owns questions explicitly naming category_19.\nu.
+      category_20 -- Owns questions explicitly naming category_20.\nv. category_21
+      -- Owns questions explicitly naming category_21.\nw. category_22 -- Owns questions
+      explicitly naming category_22.\nx. category_23 -- Owns questions explicitly
+      naming category_23.\ny. category_24 -- Owns questions explicitly naming category_24.\nz.
+      category_25 -- Owns questions explicitly naming category_25.\nA. category_26
+      -- Owns questions explicitly naming category_26.\nB. category_27 -- Owns questions
+      explicitly naming category_27.\nC. category_28 -- Owns questions explicitly
+      naming category_28.\nD. category_29 -- Owns questions explicitly naming category_29.\nE.
+      category_30 -- Owns questions explicitly naming category_30.\nF. category_31
+      -- Owns questions explicitly naming category_31.\nG. category_32 -- Owns questions
+      explicitly naming category_32.\nH. category_33 -- Owns questions explicitly
+      naming category_33.\nI. category_34 -- Owns questions explicitly naming category_34.\nJ.
+      category_35 -- Owns questions explicitly naming category_35.\nK. category_36
+      -- Owns questions explicitly naming category_36.\nL. category_37 -- Owns questions
+      explicitly naming category_37.\nM. category_38 -- Owns questions explicitly
+      naming category_38.\nN. category_39 -- Owns questions explicitly naming category_39.\nO.
+      category_40 -- Owns questions explicitly naming category_40.\nP. category_41
+      -- Owns questions explicitly naming category_41.\nQ. category_42 -- Owns questions
+      explicitly naming category_42.\nR. category_43 -- Owns questions explicitly
+      naming category_43.\nS. category_44 -- Owns questions explicitly naming category_44.\nT.
+      category_45 -- Owns questions explicitly naming category_45.\nU. category_46
+      -- Owns questions explicitly naming category_46.\nV. category_47 -- Owns questions
+      explicitly naming category_47.\nW. category_48 -- Owns questions explicitly
+      naming category_48.\nMarkers are case-sensitive: a and A are different answers.
+      Copy the exact lowercase or uppercase marker. No spaces or punctuation.\nReply
+      with exactly one character: a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p,
+      q, r, s, t, u, v, w, x, y, z, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P,
+      Q, R, S, T, U, V, W.\nQuestion: Select the category explicitly named here: category_26."}],
+      "max_tokens": 1, "temperature": 1.0, "thinking": {"type": "disabled"}, "logprobs":
+      true, "top_logprobs": 20}'
+    headers:
+      Connection:
+      - close
+      Content-Length:
+      - '8724'
+      Content-Type:
+      - application/json
+      Host:
+      - api.deepseek.com
+      User-Agent:
+      - Python-urllib/3.10
+    method: POST
+    uri: https://api.deepseek.com/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"74486108-a003-4df0-81ef-5e6d3f61a6fa\",\"object\":\"chat.completion\",\"created\":1792014101,\"model\":\"deepseek-flash\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"A\"},\"logprobs\":{\"content\":[{\"token\":\"A\",\"logprob\":-0.0005696581,\"bytes\":[65],\"top_logprobs\":[{\"token\":\"A\",\"logprob\":-0.0005696581,\"bytes\":[65]},{\"token\":\"The\",\"logprob\":-8.95297,\"bytes\":[84,104,101]},{\"token\":\"Let\",\"logprob\":-9.465104,\"bytes\":[76,101,116]},{\"token\":\"category\",\"logprob\":-9.8112,\"bytes\":[99,97,116,101,103,111,114,121]},{\"token\":\"I\",\"logprob\":-10.23956,\"bytes\":[73]},{\"token\":\"B\",\"logprob\":-11.11822,\"bytes\":[66]},{\"token\":\"If\",\"logprob\":-11.1636095,\"bytes\":[73,102]},{\"token\":\"<\uFF5C\uFF5Cend\u2581of\u2581sentence\uFF5C\uFF5C>\",\"logprob\":-11.209828,\"bytes\":[60,239,189,156,239,189,156,101,110,100,226,150,129,111,102,226,150,129,115,101,110,116,101,110,99,101,239,189,156,239,189,156,62]},{\"token\":\"W\",\"logprob\":-11.363563,\"bytes\":[87]},{\"token\":\"Select\",\"logprob\":-11.507916,\"bytes\":[83,101,108,101,99,116]},{\"token\":\"Reply\",\"logprob\":-11.602952,\"bytes\":[82,101,112,108,121]},{\"token\":\"No\",\"logprob\":-11.607276,\"bytes\":[78,111]},{\"token\":\"C\",\"logprob\":-11.763961,\"bytes\":[67]},{\"token\":\"D\",\"logprob\":-11.867553,\"bytes\":[68]},{\"token\":\"M\",\"logprob\":-11.94996,\"bytes\":[77]},{\"token\":\"Category\",\"logprob\":-12.079667,\"bytes\":[67,97,116,101,103,111,114,121]},{\"token\":\"H\",\"logprob\":-12.14322,\"bytes\":[72]},{\"token\":\"Public\",\"logprob\":-12.198228,\"bytes\":[80,117,98,108,105,99]},{\"token\":\"S\",\"logprob\":-12.2526655,\"bytes\":[83]},{\"token\":\"Copy\",\"logprob\":-12.430316,\"bytes\":[67,111,112,121]}]}]},\"finish_reason\":\"length\"}],\"usage\":{\"prompt_tokens\":1817,\"completion_tokens\":1,\"total_tokens\":1818,\"prompt_tokens_details\":{\"cached_tokens\":1664},\"prompt_cache_hit_tokens\":1664,\"prompt_cache_miss_tokens\":153},\"system_fingerprint\":\"aeb56401ca74e127821c4f9126dcb669\"}"
+    headers:
+      Connection:
+      - close
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 14 Oct 2026 21:41:42 GMT
+      Server:
+      - elb
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      Via:
+      - 1.1 239aff71dba4f4a94a3c307f7f7e4c3a.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - dSAmLCsAmdvMU3RFj3bhYqTuqVR2mTg49WlzKVIavbEZ1XcpXDpPLg==
+      X-Amz-Cf-Pop:
+      - HAN51-P2
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      access-control-allow-credentials:
+      - 'true'
+      vary:
+      - accept-encoding
+      - origin, access-control-request-method, access-control-request-headers
+      x-ds-trace-id:
+      - b13c19c67d85a72a30868c83535d5793
+    status:
+      code: 200
+      message: OK
+version: 1

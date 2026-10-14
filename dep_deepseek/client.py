@@ -13,9 +13,11 @@ class DeepSeek:
     censored distribution instead. Calls are serial and never automatically retried.
     """
 
-    def __init__(self, api_key: str | None = None, *, missing_policy: str = "zero", timeout: float = 120):
+    def __init__(self, api_key: str | None = None, *, missing_policy: str = "zero", timeout: float = 120,
+                 marker_scheme: str = "legacy"):
         key = os.environ.get("DEEPSEEK_API_KEY", "") if api_key is None else api_key
-        self._client = DeepSeekFlashClient(key, timeout_s=timeout, missing_policy=missing_policy)
+        self._client = DeepSeekFlashClient(key, timeout_s=timeout, missing_policy=missing_policy,
+                                          marker_scheme=marker_scheme)
 
     def __repr__(self):
         return f"DeepSeek(model={self._client.model!r}, missing_policy={self._client.missing_policy!r})"
@@ -31,7 +33,7 @@ class DeepSeek:
         for name, q in questions.items():
             if not isinstance(name, str) or not name.strip():
                 raise ValueError("question names must be nonempty strings")
-            build_request(state, q, self._client.model)
+            build_request(state, q, self._client.model, marker_scheme=self._client.marker_scheme)
         answers, usages = {}, []
         for name, q in questions.items():
             decision = self._client.evaluate(state, q)
@@ -48,7 +50,15 @@ class DeepSeek:
                 "missing_options": decision.missing_options,
                 "missing_policy": self._client.missing_policy,
                 "candidate_mass": decision.candidate_mass,
+                "marker_scheme": self._client.marker_scheme,
+                "reported_options_count": len(p) - len(decision.missing_options),
+                "top10_supported": len(p) - len(decision.missing_options) >= min(10, len(p)),
             }
+            if decision.reported_logprobs is not None:
+                answer["diagnostics"]["reported_logprobs"] = dict(decision.reported_logprobs)
+                answer["diagnostics"]["reported_ranking"] = sorted(
+                    decision.reported_logprobs, key=decision.reported_logprobs.get, reverse=True)
+            answer["usage"] = dict(decision.usage)
             answers[name] = answer
             usages.append(decision.usage)
         usage = {}
@@ -57,6 +67,11 @@ class DeepSeek:
             values = [u.get(source) for u in usages]
             known = all(isinstance(v, int) and not isinstance(v, bool) and v >= 0 for v in values)
             usage[target] = sum(values) if known else None
+        if self._client.marker_scheme == "letters52":
+            for field in ("prompt_cache_hit_tokens", "prompt_cache_miss_tokens"):
+                values = [u.get(field) for u in usages]
+                usage[field] = (sum(values) if all(isinstance(v, int) and not isinstance(v, bool)
+                               and v >= 0 for v in values) else None)
         return {"answers": answers, "model": self._client.model, "usage": usage}
 
     def noul(self, state, instructions: str, criteria: dict | None = None) -> dict:
