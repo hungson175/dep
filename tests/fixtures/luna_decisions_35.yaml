@@ -1,0 +1,72 @@
+version: 1
+interactions:
+- request:
+    method: POST
+    uri: https://api.openai.com/v1/decisions
+    body: '{"model": "gpt-6-luna", "input": "The target category is option_17.", "questions":
+      [{"type": "choice", "name": "decision", "instructions": "Select the category
+      explicitly named in the input.", "choices": [{"value": "option_1", "description":
+      "Target category option_1."}, {"value": "option_2", "description": "Target category
+      option_2."}, {"value": "option_3", "description": "Target category option_3."},
+      {"value": "option_4", "description": "Target category option_4."}, {"value":
+      "option_5", "description": "Target category option_5."}, {"value": "option_6",
+      "description": "Target category option_6."}, {"value": "option_7", "description":
+      "Target category option_7."}, {"value": "option_8", "description": "Target category
+      option_8."}, {"value": "option_9", "description": "Target category option_9."},
+      {"value": "option_10", "description": "Target category option_10."}, {"value":
+      "option_11", "description": "Target category option_11."}, {"value": "option_12",
+      "description": "Target category option_12."}, {"value": "option_13", "description":
+      "Target category option_13."}, {"value": "option_14", "description": "Target
+      category option_14."}, {"value": "option_15", "description": "Target category
+      option_15."}, {"value": "option_16", "description": "Target category option_16."},
+      {"value": "option_17", "description": "Target category option_17."}, {"value":
+      "option_18", "description": "Target category option_18."}, {"value": "option_19",
+      "description": "Target category option_19."}, {"value": "option_20", "description":
+      "Target category option_20."}, {"value": "option_21", "description": "Target
+      category option_21."}, {"value": "option_22", "description": "Target category
+      option_22."}, {"value": "option_23", "description": "Target category option_23."},
+      {"value": "option_24", "description": "Target category option_24."}, {"value":
+      "option_25", "description": "Target category option_25."}, {"value": "option_26",
+      "description": "Target category option_26."}, {"value": "option_27", "description":
+      "Target category option_27."}, {"value": "option_28", "description": "Target
+      category option_28."}, {"value": "option_29", "description": "Target category
+      option_29."}, {"value": "option_30", "description": "Target category option_30."},
+      {"value": "option_31", "description": "Target category option_31."}, {"value":
+      "option_32", "description": "Target category option_32."}, {"value": "option_33",
+      "description": "Target category option_33."}, {"value": "option_34", "description":
+      "Target category option_34."}, {"value": "option_35", "description": "Target
+      category option_35."}]}]}'
+    headers:
+      Content-Type:
+      - application/json
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+    body:
+      string: '{"model": "gpt-6-luna", "answers": [{"type": "choice", "name": "decision",
+        "choice": "option_17", "probabilities": [{"value": "option_1", "probability":
+        0.0}, {"value": "option_2", "probability": 0.0}, {"value": "option_3", "probability":
+        0.0}, {"value": "option_4", "probability": 0.0}, {"value": "option_5", "probability":
+        0.0}, {"value": "option_6", "probability": 0.0}, {"value": "option_7", "probability":
+        0.0}, {"value": "option_8", "probability": 0.0}, {"value": "option_9", "probability":
+        0.0}, {"value": "option_10", "probability": 0.0}, {"value": "option_11", "probability":
+        0.0}, {"value": "option_12", "probability": 0.0}, {"value": "option_13", "probability":
+        0.0}, {"value": "option_14", "probability": 0.0}, {"value": "option_15", "probability":
+        0.0}, {"value": "option_16", "probability": 0.01}, {"value": "option_17",
+        "probability": 0.98}, {"value": "option_18", "probability": 0.01}, {"value":
+        "option_19", "probability": 0.0}, {"value": "option_20", "probability": 0.0},
+        {"value": "option_21", "probability": 0.0}, {"value": "option_22", "probability":
+        0.0}, {"value": "option_23", "probability": 0.0}, {"value": "option_24", "probability":
+        0.0}, {"value": "option_25", "probability": 0.0}, {"value": "option_26", "probability":
+        0.0}, {"value": "option_27", "probability": 0.0}, {"value": "option_28", "probability":
+        0.0}, {"value": "option_29", "probability": 0.0}, {"value": "option_30", "probability":
+        0.0}, {"value": "option_31", "probability": 0.0}, {"value": "option_32", "probability":
+        0.0}, {"value": "option_33", "probability": 0.0}, {"value": "option_34", "probability":
+        0.0}, {"value": "option_35", "probability": 0.0}], "confidence": 0.98}], "usage":
+        {"input_tokens": 530, "input_tokens_details": {"cached_tokens": 0, "cache_write_tokens":
+        0}, "output_tokens": 0, "output_tokens_details": {"reasoning_tokens": 0},
+        "total_tokens": 530}}'

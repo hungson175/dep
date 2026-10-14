@@ -1,4 +1,4 @@
-# Luna subscription adapter validation
+# Luna adapter validation
 
 15 October 2026. Coverage applies to the **new Luna adapter and benchmark runner**, not the entire repository.
 
@@ -18,3 +18,19 @@ python -m coverage html
 ```
 
 No UI, deployed service, dependency installation, model fallback, or paid API route was changed. The new subscription client is experimental, owner-local, and returns labels only; no candidate probability distribution is fabricated.
+
+## Native Decisions API adapter
+
+15 October 2026. This is a separate paid-API adapter, not the subscription implementation above.
+
+- Full suite after adding Decisions: **120 tests PASS; 4 pre-existing opt-in tests skipped**.
+- New Decisions code: **156/157 statements (99.36%)**, **37/40 branches (92.50%)**; combined coverage **97.97%**.
+- `benchmarks/jevbench_luna_decisions.py`: **100%** combined coverage. `dep_luna_decisions.py`: **97%**.
+- VCR replay verifies a real 35-option native distribution. Tests cover predicate/choice/score mappings, gold isolation, native-distribution validation, personal-key selection, pricing/cap behavior, and access/infrastructure stop gates. Model refusals remain wrong answers rather than silently dropping later tasks.
+- Live end-to-end run and audit are documented in `docs/benchmarks/luna6_decisions_public_20261015.md`.
+
+```sh
+python -m coverage run --branch --source=dep_luna_decisions,benchmarks.jevbench_luna_decisions -m unittest discover -s tests
+python -m coverage report -m
+python -m coverage html
+```
