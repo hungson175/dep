@@ -46,3 +46,6 @@ build/
 runtime/
 static/packages/
 static/library.html
+
+# Private reference material; never publish.
+/ref/
