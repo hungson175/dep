@@ -61,3 +61,13 @@ Requires a valid personal `OPENAI_API_KEY` in `~/dev/.env`. Importing the adapte
 - Public aggregate data: [`luna6_decisions_public_20261015.json`](luna6_decisions_public_20261015.json). No raw private run data or credentials are published.
 
 The benchmark HTML page was not changed; this report is published separately to prevent conflating native-distribution and label-only results.
+
+## User-authorized retry of the three HTTP 503 cases
+
+15 October 2026: Boss explicitly requested rerunning only the three failed requests. Each was sent once more; **all three returned HTTP 200, valid native distributions and correct answers**, with zero output/reasoning tokens. The original run, raw evidence and 204/231 headline above remain unchanged.
+
+Replacing those three unresolved cases with their new replies gives **207/231 correct (89.61%)**, with 231 valid distributions. This is a **retry-resolved result**, not a fresh no-retry 231-request pass. There were 234 provider requests overall: the original 231 plus three authorized retries.
+
+Retry usage-derived charge: **$0.0003097**, not an invoice. Initial failed-request charges remain unknown. Any latency in the retry-resolved aggregate describes the selected replies only and excludes the initial failed attempts; do not label it end-to-end retry latency or silently replace the original latency measurement.
+
+The original 228 successful cases were not rerun. Local supplemental evidence: `benchmark_runs/luna6_decisions_retry3_20261015T033223`, including retry records, raw replies, resolved summary and audit. Public JSON includes a separate `user_authorized_retry` section, preserving the original summary.
