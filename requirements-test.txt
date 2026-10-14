@@ -1,0 +1,3 @@
+-r requirements.txt
+coverage==7.13.1
+vcrpy==8.1.1

@@ -1,0 +1,133 @@
+version: 1
+interactions:
+- request:
+    method: POST
+    uri: https://chatgpt.com/backend-api/codex/responses
+    body: '{"model": "gpt-6-luna", "instructions": "Classify the supplied context.
+      Return only the requested answer code.", "input": [{"role": "user", "content":
+      [{"type": "input_text", "text": "Text:\nWhere is my package? I ordered it last
+      week and it still hasn''t arrived.\n\nQuestion: Which intent does the user''s
+      message express?\nOptions:\n1. billing_question -- Asks about a charge, invoice
+      or payment\n2. cancel_order -- Wants to cancel an order\n3. change_address --
+      Wants to change the delivery address\n4. report_damage -- Received an item that
+      is broken or damaged\n5. track_order -- Wants to know where an order is or when
+      it arrives\nReply with exactly one character: 1, 2, 3, 4, 5."}]}], "reasoning":
+      {"effort": "none"}, "store": false, "stream": true, "include": ["message.output_text.logprobs"]}'
+    headers:
+      Content-Type:
+      - application/json
+      Accept:
+      - text/event-stream
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - text/event-stream
+    body:
+      string: 'data: {"type": "response.created", "response": {"id": "resp_078d4f5788cc92e3016acfdf99b29087d0ac88d512758f7b8a",
+        "object": "response", "created_at": 1792008089, "status": "in_progress", "access_programs":
+        null, "background": false, "completed_at": null, "error": null, "frequency_penalty":
+        0.0, "incomplete_details": null, "instructions": "Classify the supplied context.
+        Return only the requested answer code.", "max_output_tokens": null, "max_tool_calls":
+        null, "model": "gpt-6-luna", "moderation": null, "output": [], "parallel_tool_calls":
+        true, "presence_penalty": 0.0, "previous_response_id": null, "prompt_cache_key":
+        "99956789-5197-449f-a79d-8a7fe3a60c15", "prompt_cache_retention": "24h", "reasoning":
+        {"context": "all_turns", "effort": "none", "mode": "standard", "summary":
+        null}, "safety_identifier": "user-InfAS0srpyP3vJp7NzmW7AaF", "service_tier":
+        "auto", "store": false, "temperature": 1.0, "text": {"format": {"type": "text"},
+        "verbosity": "medium"}, "tool_choice": "auto", "tool_usage": {"image_gen":
+        {"input_tokens": 0, "input_tokens_details": {"image_tokens": 0, "text_tokens":
+        0}, "output_tokens": 0, "output_tokens_details": {"image_tokens": 0, "text_tokens":
+        0}, "total_tokens": 0}, "web_search": {"num_requests": 0}}, "tools": [], "top_logprobs":
+        0, "top_p": 0.98, "truncation": "disabled", "usage": null, "user": null, "metadata":
+        {}}, "sequence_number": 0}
+
+
+        data: {"type": "response.in_progress", "response": {"id": "resp_078d4f5788cc92e3016acfdf99b29087d0ac88d512758f7b8a",
+        "object": "response", "created_at": 1792008089, "status": "in_progress", "access_programs":
+        null, "background": false, "completed_at": null, "error": null, "frequency_penalty":
+        0.0, "incomplete_details": null, "instructions": "Classify the supplied context.
+        Return only the requested answer code.", "max_output_tokens": null, "max_tool_calls":
+        null, "model": "gpt-6-luna", "moderation": null, "output": [], "parallel_tool_calls":
+        true, "presence_penalty": 0.0, "previous_response_id": null, "prompt_cache_key":
+        "99956789-5197-449f-a79d-8a7fe3a60c15", "prompt_cache_retention": "24h", "reasoning":
+        {"context": "all_turns", "effort": "none", "mode": "standard", "summary":
+        null}, "safety_identifier": "user-InfAS0srpyP3vJp7NzmW7AaF", "service_tier":
+        "auto", "store": false, "temperature": 1.0, "text": {"format": {"type": "text"},
+        "verbosity": "medium"}, "tool_choice": "auto", "tool_usage": {"image_gen":
+        {"input_tokens": 0, "input_tokens_details": {"image_tokens": 0, "text_tokens":
+        0}, "output_tokens": 0, "output_tokens_details": {"image_tokens": 0, "text_tokens":
+        0}, "total_tokens": 0}, "web_search": {"num_requests": 0}}, "tools": [], "top_logprobs":
+        0, "top_p": 0.98, "truncation": "disabled", "usage": null, "user": null, "metadata":
+        {}}, "sequence_number": 1}
+
+
+        data: {"type": "response.output_item.added", "item": {"id": "msg_078d4f5788cc92e3016acfdf9a5efc87d0bf044ea77a812791",
+        "type": "message", "status": "in_progress", "content": [], "phase": "final_answer",
+        "role": "assistant"}, "output_index": 0, "sequence_number": 2}
+
+
+        data: {"type": "response.content_part.added", "content_index": 0, "item_id":
+        "msg_078d4f5788cc92e3016acfdf9a5efc87d0bf044ea77a812791", "output_index":
+        0, "part": {"type": "output_text", "annotations": [], "logprobs": [], "text":
+        ""}, "sequence_number": 3}
+
+
+        data: {"type": "response.output_text.delta", "content_index": 0, "delta":
+        "5", "item_id": "msg_078d4f5788cc92e3016acfdf9a5efc87d0bf044ea77a812791",
+        "logprobs": [{"bytes": [53], "logprob": 1.52587890625e-05, "token": "5", "top_logprobs":
+        []}], "obfuscation": "vQUbIGpnKAviBSk", "output_index": 0, "sequence_number":
+        4}
+
+
+        data: {"type": "response.output_text.done", "content_index": 0, "item_id":
+        "msg_078d4f5788cc92e3016acfdf9a5efc87d0bf044ea77a812791", "logprobs": [{"bytes":
+        [53], "logprob": 1.52587890625e-05, "token": "5", "top_logprobs": []}], "output_index":
+        0, "sequence_number": 5, "text": "5"}
+
+
+        data: {"type": "response.content_part.done", "content_index": 0, "item_id":
+        "msg_078d4f5788cc92e3016acfdf9a5efc87d0bf044ea77a812791", "output_index":
+        0, "part": {"type": "output_text", "annotations": [], "logprobs": [], "text":
+        "5"}, "sequence_number": 6}
+
+
+        data: {"type": "response.output_item.done", "item": {"id": "msg_078d4f5788cc92e3016acfdf9a5efc87d0bf044ea77a812791",
+        "type": "message", "status": "completed", "content": [{"type": "output_text",
+        "annotations": [], "logprobs": [{"bytes": [53], "logprob": 1.5e-05, "token":
+        "5", "top_logprobs": []}], "text": "5"}], "phase": "final_answer", "role":
+        "assistant"}, "output_index": 0, "sequence_number": 7}
+
+
+        data: {"type": "response.completed", "response": {"id": "resp_078d4f5788cc92e3016acfdf99b29087d0ac88d512758f7b8a",
+        "object": "response", "created_at": 1792008089, "status": "completed", "access_programs":
+        null, "background": false, "completed_at": 1792008090, "error": null, "frequency_penalty":
+        0.0, "incomplete_details": null, "instructions": "Classify the supplied context.
+        Return only the requested answer code.", "max_output_tokens": null, "max_tool_calls":
+        null, "model": "gpt-6-luna", "moderation": null, "output": [], "parallel_tool_calls":
+        true, "presence_penalty": 0.0, "previous_response_id": null, "prompt_cache_key":
+        "99956789-5197-449f-a79d-8a7fe3a60c15", "prompt_cache_retention": "24h", "reasoning":
+        {"context": "all_turns", "effort": "none", "mode": "standard", "summary":
+        null}, "safety_identifier": "user-InfAS0srpyP3vJp7NzmW7AaF", "service_tier":
+        "default", "store": false, "temperature": 1.0, "text": {"format": {"type":
+        "text"}, "verbosity": "medium"}, "tool_choice": "auto", "tool_usage": {"image_gen":
+        {"input_tokens": 0, "input_tokens_details": {"image_tokens": 0, "text_tokens":
+        0}, "output_tokens": 0, "output_tokens_details": {"image_tokens": 0, "text_tokens":
+        0}, "total_tokens": 0}, "web_search": {"num_requests": 0}}, "tools": [], "top_logprobs":
+        0, "top_p": 0.98, "truncation": "disabled", "usage": {"attribution": {"items":
+        {"msg_078d4f5788cc92e3016acfdf99ba5087d08699121fcf90e8e6": {"cache_write_tokens":
+        0, "cached_tokens": 0, "content": [{"cache_write_tokens": 0, "cached_tokens":
+        0, "input_tokens": 124, "output_tokens": 0}], "input_tokens": 124, "output_tokens":
+        0}, "msg_078d4f5788cc92e3016acfdf9a5efc87d0bf044ea77a812791": {"cache_write_tokens":
+        0, "cached_tokens": 0, "content": [{"cache_write_tokens": 0, "cached_tokens":
+        0, "input_tokens": 2, "output_tokens": 5}], "input_tokens": 2, "output_tokens":
+        5}}, "request_fields": {"instructions": {"cache_write_tokens": 0, "cached_tokens":
+        0, "input_tokens": 17, "output_tokens": 0}}}, "input_tokens": 143, "input_tokens_details":
+        {"cache_write_tokens": 0, "cached_tokens": 0}, "output_tokens": 5, "output_tokens_details":
+        {"reasoning_tokens": 0}, "total_tokens": 148}, "user": null, "metadata": {}},
+        "sequence_number": 8}
+
+
+        '
